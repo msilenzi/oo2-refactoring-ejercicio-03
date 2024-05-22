@@ -313,7 +313,7 @@ Primero vamos a aplicar ***Extract Method*** para separar el recorrido de la lis
 cada elemento. Para ello, vamos a crear un nuevo método `calcularMontoTotalLlamada()` que se encargará de calcular
 el monto de cada llamada de forma individual.
 
-Luego utilizaremos ***Substitute Algorithm*** para simplificar ligeramente la lógica que se utiliza para calcular 
+Luego utilizaremos ***Substitute Algorithm*** para simplificar ligeramente la lógica que se utiliza para calcular
 los montos.
 
 Después vamos a utilizar ***Extract Method*** nuevamente en el nuevo método para crear dos métodos más:
@@ -356,6 +356,76 @@ public class Cliente {
     }
     // ...
 }
+```
+
+---
+
+## Refactoring 4
+
+### Mal olor
+
+Ahora que extrajimos el cálculo del costo de una llamada al método `calcularMontoLlamada()` podemos ver claramente
+que la clase `Cliente` tiene envidia de atributos de la clase Llamada. Esto es un problema porque la clase `Cliente`
+se encarga de hacer cosas (calcular el costo de una llamada) que deberían ser responsabilidad de la clase `Llamada`.
+Además, actualmente nuestra clase `Llamada` está anémica, ya que no tiene ninguna responsabilidad.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    // ...
+    private double calcularMontoTotalLlamada(Llamada l) {
+        return aplicarDescuento(calcularMontoLlamada(l));
+    }
+
+    private double calcularMontoLlamada(Llamada l) {
+        if (l.getTipoDeLlamada() == "nacional") {
+            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+            return l.getDuracion() * 3 * 1.21;
+        } else if (l.getTipoDeLlamada() == "internacional") {
+            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+            return l.getDuracion() * 150 * 1.21 + 50;
+        }
+        return 0;
+    }
+    // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver este mal olor aplicaremos ***Move Method*** para mover el método `calcularMontoLlamada()` desde la
+clase `Cliente` a la clase `Llamada` y después renombraremos el método a `calcularMonto()` y mejoramos los nombres
+de los parámetros.
+
+### Código con el refactoring aplicado
+
+```java
+public class Cliente {
+    // ...
+    private double calcularMontoTotalLlamada(Llamada llamada) {
+        return aplicarDescuento(llamada.calcularMonto());
+    }
+    // ...
+}
+```
+
+```java
+public class Llamada {
+    // ...
+    public double calcularMonto() {
+        if (this.getTipoDeLlamada() == "nacional") {
+            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+            return this.getDuracion() * 3 * 1.21;
+        }
+        if (this.getTipoDeLlamada() == "internacional") {
+            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+            return this.getDuracion() * 150 * 1.21 + 50;
+        }
+        return 0;
+    }
+}
+//...
 ```
 
 ---

@@ -24,19 +24,8 @@ public class Cliente {
         return this.llamadas.stream().mapToDouble(this::calcularMontoTotalLlamada).sum();
     }
 
-    private double calcularMontoTotalLlamada(Llamada l) {
-        return aplicarDescuento(calcularMontoLlamada(l));
-    }
-
-    private double calcularMontoLlamada(Llamada l) {
-        if (l.getTipoDeLlamada() == "nacional") {
-            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
-            return l.getDuracion() * 3 * 1.21;
-        } else if (l.getTipoDeLlamada() == "internacional") {
-            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
-            return l.getDuracion() * 150 * 1.21 + 50;
-        }
-        return 0;
+    private double calcularMontoTotalLlamada(Llamada llamada) {
+        return aplicarDescuento(llamada.calcularMonto());
     }
 
     private double aplicarDescuento(double monto) {
