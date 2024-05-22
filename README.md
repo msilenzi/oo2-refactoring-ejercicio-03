@@ -472,11 +472,19 @@ en una clase abstracta de la que extienden dos nuevas subclases: `LlamadaNaciona
 Luego haremos que el método `calcularMonto()` sea abstracto para que cada una de las subclases lo implemente de
 acuerdo a lo que necesita.
 
-Al realizar estos cambios ya no podremos instanciar a `Llamada`, puesto que es una clase abstracta, por lo que le
-añadiremos un factory method `crearLlamada()` que se encargue de instanciar a la clase adecuada según el tipo
-utilizado.
+Al realizar estos cambios ya no podremos instanciar a `Llamada`, puesto que es una clase abstracta. Para solucionar
+esto añadiremos tres métodos a la clase `Cliente`:
 
-Finalmente, utilizaremos el nuevo método estático `crearLlamada()` en la clase `Cliente`.
+- `_registrarLlamada()`: un método privado que se encargará de manejar la lógica de registrar una llamada.
+- `registrarLlamadaNacional()`: un método público que se encargará de crear una llamada nacional y se la pasará a
+  `_registrarLlamada()` para que la registre.
+- `registrarLlamadaInternacional()`: un método público que se encargará de crear una llamada internacional y se la
+  pasará a `_registrarLlamada()` para que la registre.
+
+Finalmente, modificaremos al método `registrarLlamada()` para que se encargue de llamar a `registrarLlamadaNacional()`
+o `registrarLlamadaInternacional()` según corresponda. Marcaremos este método como *obsoleto* porque consideramos
+que es preferible utilizar alguno de los nuevos métodos, pero no lo borramos porque no queremos modificar la interfaz 
+de la clase `Cliente`.
 
 ### Código con el refactoring aplicado
 
@@ -485,17 +493,6 @@ public abstract class Llamada {
     private String origen;
     private String destino;
     private int duracion;
-
-    public static Llamada crearLlamada(String tipo, String origen, String destino, int duracion) {
-        switch (tipo) {
-            case "nacional":
-                return new LlamadaNacional(origen, destino, duracion);
-            case "internacional":
-                return new LlamadaInternacional(origen, destino, duracion);
-            default:
-                throw new IllegalArgumentException(tipo + " no es un tipo válido");
-        }
-    }
 
     public Llamada(String origen, String destino, int duracion) {
         this.origen = origen;
@@ -539,11 +536,36 @@ public class LlamadaInternacional extends Llamada {
 
 ```java
 public class Cliente {
+    // Atributos...
+
+    @Deprecated
     public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
-        Llamada llamada = Llamada.crearLlamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        switch (tipo) {
+            case "nacional":
+                return this.registrarLlamadaNacional(destino, duracion);
+            case "internacional":
+                return this.registrarLlamadaInternacional(destino, duracion);
+            default:
+                throw new IllegalArgumentException(tipo + " no es un tipo válido");
+        }
+    }
+
+    private Llamada _registrarLlamada(Llamada llamada) {
         this.llamadas.add(llamada);
         return llamada;
     }
+
+    public Llamada registrarLlamadaNacional(Cliente destino, int duracion) {
+        return this._registrarLlamada(
+                new LlamadaNacional(this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion));
+    }
+
+    public Llamada registrarLlamadaInternacional(Cliente destino, int duracion) {
+        return this._registrarLlamada(
+                new LlamadaInternacional(this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion));
+    }
+
+    // Otros métodos
 }
 ```
 
