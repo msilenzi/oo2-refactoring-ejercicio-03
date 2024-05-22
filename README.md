@@ -43,4 +43,20 @@ Usted debe entregar:
 
 ---
 
-## Refactoring 1
+## Refactoring X
+
+### Mal olor
+Explicación
+
+### Extracto del código que presenta el mal olor
+```java
+
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+Explicación
+
+### Código con el refactoring aplicado
+```java
+
+```
