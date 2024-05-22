@@ -6,8 +6,12 @@ public class LlamadaNacional extends Llamada {
     }
 
     @Override
-    public double calcularMonto() {
-        // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
-        return this.getDuracion() * 3 * 1.21;
+    protected double getCostoPorSegundo() {
+        return 3;
+    }
+
+    @Override
+    protected double getCostoAdicional() {
+        return 0;
     }
 }

@@ -6,8 +6,12 @@ public class LlamadaInternacional extends Llamada {
     }
 
     @Override
-    public double calcularMonto() {
-        // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
-        return this.getDuracion() * 150 * 1.21 + 50;
+    protected double getCostoPorSegundo() {
+        return 150;
+    }
+
+    @Override
+    protected double getCostoAdicional() {
+        return 50;
     }
 }

@@ -5,13 +5,21 @@ public abstract class Llamada {
     private String destino;
     private int duracion;
 
+    private static final double IVA = 0.21;
+
     public Llamada(String origen, String destino, int duracion) {
         this.origen = origen;
         this.destino = destino;
         this.duracion = duracion;
     }
 
-    public abstract double calcularMonto();
+    public double calcularMonto() {
+        return this.getDuracion() * this.getCostoPorSegundo() * (1 + IVA) + this.getCostoAdicional();
+    }
+
+    protected abstract double getCostoPorSegundo();
+
+    protected abstract double getCostoAdicional();
 
     //
     // Getters y setters

@@ -483,7 +483,7 @@ esto añadiremos tres métodos a la clase `Cliente`:
 
 Finalmente, modificaremos al método `registrarLlamada()` para que se encargue de llamar a `registrarLlamadaNacional()`
 o `registrarLlamadaInternacional()` según corresponda. Marcaremos este método como *obsoleto* porque consideramos
-que es preferible utilizar alguno de los nuevos métodos, pero no lo borramos porque no queremos modificar la interfaz 
+que es preferible utilizar alguno de los nuevos métodos, pero no lo borramos porque no queremos modificar la interfaz
 de la clase `Cliente`.
 
 ### Código con el refactoring aplicado
@@ -566,6 +566,110 @@ public class Cliente {
     }
 
     // Otros métodos
+}
+```
+
+---
+
+## Refactoring 6
+
+### Mal olor
+
+Las implementaciones al método `calcularMonto()` de `Llamada` realizan la misma serie de pasos. Podemos pensar el
+cálculo del monto como una receta formada por duración * precio por segundo (3 para las nacionales y 150 para las
+internacionales) + IVA + costo adicional (0 para las llamadas nacionales y 50 para las internacionales). Además,
+estos métodos están llenos de *números mágicos* que atentan contra la legibilidad del código.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class LlamadaInternacional extends Llamada {
+    // ...
+    @Override
+    public double calcularMonto() {
+        // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+        return this.getDuracion() * 150 * 1.21 + 50;
+    }
+}
+```
+
+```java
+public class LlamadaNacional extends Llamada {
+    // ...
+    @Override
+    public double calcularMonto() {
+        // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+        return this.getDuracion() * 3 * 1.21;
+    }
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Aplicaremos ***Form Template Method***, para ello haremos que el método `calcularMonto()` en la clase `Llamada` deje
+de ser abstracta e implemente los pasos abstractos utilizando los métodos abstractos y protegidos `getCostoPorSegundo()`
+y `getCostoAdicional()`, que deberán ser implementados por las subclases. Además, siguiendo ***Replace Magic
+Literal***, definiremos una constante simbólica para reemplazar el número mágico del IVA.
+
+### Código con el refactoring aplicado
+
+```java
+public abstract class Llamada {
+    // Atributos...
+
+    private static final double IVA = 0.21;
+
+    public Llamada(String origen, String destino, int duracion) {
+        this.origen = origen;
+        this.destino = destino;
+        this.duracion = duracion;
+    }
+
+    public double calcularMonto() {
+        return this.getDuracion() * this.getCostoPorSegundo() * (1 + IVA) + this.getCostoAdicional();
+    }
+
+    protected abstract double getCostoPorSegundo();
+
+    protected abstract double getCostoAdicional();
+
+    // Getters y setters...
+}
+```
+
+```java
+public class LlamadaNacional extends Llamada {
+    public LlamadaNacional(String origen, String destino, int duracion) {
+        super(origen, destino, duracion);
+    }
+
+    @Override
+    protected double getCostoPorSegundo() {
+        return 3;
+    }
+
+    @Override
+    protected double getCostoAdicional() {
+        return 0;
+    }
+}
+```
+
+```java
+public class LlamadaInternacional extends Llamada {
+    public LlamadaInternacional(String origen, String destino, int duracion) {
+        super(origen, destino, duracion);
+    }
+
+    @Override
+    protected double getCostoPorSegundo() {
+        return 150;
+    }
+
+    @Override
+    protected double getCostoAdicional() {
+        return 50;
+    }
 }
 ```
 
