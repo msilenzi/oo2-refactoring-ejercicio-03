@@ -15,7 +15,7 @@ public class Cliente {
     static double descuentoFis = 0;
 
     public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
-        Llamada llamada = new Llamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        Llamada llamada = Llamada.crearLlamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
         this.llamadas.add(llamada);
         return llamada;
     }

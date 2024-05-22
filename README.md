@@ -140,10 +140,10 @@ tipo de cliente.
 Mantendremos los métodos en la clase `Empresa` para evitar modificar la interfaz de dicha clase, pero estos métodos
 ahora delegarán su tarea en los nuevos métodos de la clase `Cliente`.
 
-Además, aprovechando que estamos modificando estos métodos, vamos a renombrar al parámetro `t` por `tipo` ya que
-consideramos que es más descriptivo (***Rename Field***).
+Además, aprovechando que estamos modificando estos métodos, vamos a aplicar ***Rename Field*** para renombrar al
+parámetro `t` por `tipo`, ya que consideramos que es más descriptivo.
 
-Finalmente, marcaremos al método `calcularMontoTotalLlamadas` como obsoleto (*deprecated*), puesto que consideramos
+Finalmente, marcaremos al método `calcularMontoTotalLlamadas()` como obsoleto (*deprecated*), puesto que consideramos
 que es preferible utilizar este método directamente desde el cliente. No lo borramos, aplicando ***Remove Middle Man***,
 para evitar modificar la interfaz de la clase `Cliente` y los test; sin embargo, al marcarlo como obsoleto, dejamos el
 terreno preparado para hacerlo fácilmente en un futuro.
@@ -218,8 +218,8 @@ public class Empresa {
 
 ### Mal olor
 
-La variable de instancia `llamadas` en la clase `Empresa` no tiene mucho sentido. Cada cliente conoce todas
-sus llamadas y tiene sentido que así sea. Esta variable de instancia no solo genera duplicación de información,
+La variable de instancia `llamadas` en la clase `Empresa` no tiene mucho sentido. Cada cliente ya conoce todas
+sus llamadas, y tiene sentido que así sea. Esta variable de instancia no solo genera duplicación de información,
 sino que además sus valores no se utilizan, solo agregamos las llamadas a la lista, pero luego no utilizamos esta
 información para procesar nada.
 
@@ -244,7 +244,7 @@ public class Empresa {
 ### Refactoring a aplicar que resuelve el mal olor
 
 Vamos a eliminar la variable de instancia `llamadas` de la clase `Empresa`. Al hacer esto tenemos que modificar el
-método `registrarLlamada`, que ahora únicamente delegará su tarea en el cliente de origen; por ello, siguiendo con el
+método `registrarLlamada()`, que ahora únicamente delegará su tarea en el cliente de origen; por ello, siguiendo con el
 mismo criterio que en el refactoring anterior, marcaremos a este método como obsoleto.
 
 ### Código con el refactoring aplicado
@@ -426,6 +426,125 @@ public class Llamada {
     }
 }
 //...
+```
+
+---
+
+## Refactoring 5
+
+### Mal olor
+
+En el método `calcularMonto()` de la clase `Llamada` utilizamos un `if` que pregunta por un tipo para determinar la
+forma en la que calculamos el monto. Esto es un problema porque no se aprovecha el polimorfismo y hace más compleja
+a la clase `Llamada`.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Llamada {
+    private String tipoDeLlamada;
+
+    // ...
+    public double calcularMonto() {
+        if (this.getTipoDeLlamada() == "nacional") {
+            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+            return this.getDuracion() * 3 * 1.21;
+        }
+        if (this.getTipoDeLlamada() == "internacional") {
+            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+            return this.getDuracion() * 150 * 1.21 + 50;
+        }
+        return 0;
+    }
+
+    // ...
+    public String getTipoDeLlamada() {
+        return tipoDeLlamada;
+    }
+}
+
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver este mal olor aplicaremos ***Replace Conditional with Polymorphism***. Transformaremos la clase `Llamada`
+en una clase abstracta de la que extienden dos nuevas subclases: `LlamadaNacional` y `LlamadaInternacional`.
+Luego haremos que el método `calcularMonto()` sea abstracto para que cada una de las subclases lo implemente de
+acuerdo a lo que necesita.
+
+Al realizar estos cambios ya no podremos instanciar a `Llamada`, puesto que es una clase abstracta, por lo que le
+añadiremos un factory method `crearLlamada()` que se encargue de instanciar a la clase adecuada según el tipo
+utilizado.
+
+Finalmente, utilizaremos el nuevo método estático `crearLlamada()` en la clase `Cliente`.
+
+### Código con el refactoring aplicado
+
+```java
+public abstract class Llamada {
+    private String origen;
+    private String destino;
+    private int duracion;
+
+    public static Llamada crearLlamada(String tipo, String origen, String destino, int duracion) {
+        switch (tipo) {
+            case "nacional":
+                return new LlamadaNacional(origen, destino, duracion);
+            case "internacional":
+                return new LlamadaInternacional(origen, destino, duracion);
+            default:
+                throw new IllegalArgumentException(tipo + " no es un tipo válido");
+        }
+    }
+
+    public Llamada(String origen, String destino, int duracion) {
+        this.origen = origen;
+        this.destino = destino;
+        this.duracion = duracion;
+    }
+
+    public abstract double calcularMonto();
+
+    // Getters y setters (sin getTipoDeLlamada())
+}
+```
+
+```java
+public class LlamadaNacional extends Llamada {
+    public LlamadaNacional(String origen, String destino, int duracion) {
+        super(origen, destino, duracion);
+    }
+
+    @Override
+    public double calcularMonto() {
+        // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+        return this.getDuracion() * 3 * 1.21;
+    }
+}
+```
+
+```java
+public class LlamadaInternacional extends Llamada {
+    public LlamadaInternacional(String origen, String destino, int duracion) {
+        super(origen, destino, duracion);
+    }
+
+    @Override
+    public double calcularMonto() {
+        // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+        return this.getDuracion() * 150 * 1.21 + 50;
+    }
+}
+```
+
+```java
+public class Cliente {
+    public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
+        Llamada llamada = Llamada.crearLlamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        this.llamadas.add(llamada);
+        return llamada;
+    }
+}
 ```
 
 ---
