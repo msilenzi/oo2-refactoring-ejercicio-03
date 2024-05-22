@@ -11,6 +11,40 @@ public class Cliente {
     private String cuit;
     private String dni;
 
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
+        Llamada llamada = new Llamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        this.llamadas.add(llamada);
+        return llamada;
+    }
+
+    public double calcularMontoTotalLlamadas() {
+        double c = 0;
+        for (Llamada l : this.llamadas) {
+            double auxc = 0;
+            if (l.getTipoDeLlamada() == "nacional") {
+                // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+                auxc += l.getDuracion() * 3 + (l.getDuracion() * 3 * 0.21);
+            } else if (l.getTipoDeLlamada() == "internacional") {
+                // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+                auxc += l.getDuracion() * 150 + (l.getDuracion() * 150 * 0.21) + 50;
+            }
+
+            if (this.getTipo() == "fisica") {
+                auxc -= auxc * descuentoFis;
+            } else if (this.getTipo() == "juridica") {
+                auxc -= auxc * descuentoJur;
+            }
+            c += auxc;
+        }
+        return c;
+    }
+
+    //
+    // Getters y setters
+
     public String getTipo() {
         return tipo;
     }

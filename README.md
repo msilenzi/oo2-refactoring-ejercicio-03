@@ -43,20 +43,193 @@ Usted debe entregar:
 
 ---
 
+## Refactoring 1
+
+### Mal olor
+
+La clase `Cliente` es una *clase anémica* que solo posee datos y sus getters y setters porque la clase `Empresa`
+tiene envidia de atributos y usa sus datos para registrar las llamadas y calcular el monto total de las llamadas.
+
+Esto es un problema porque la clase `Empresa` no cumple con el principio de responsabilidad única y es muy grande, ya
+que resuelve cosas de las que no es responsable. Además, la clase `Cliente` provee getters y setters públicos para
+todos sus atributos lo que da demasiada visibilidad al resto del programa; esto puede no ser un problema, pero es
+conveniente reducir la visibilidad lo máximo posible.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    public List<Llamada> llamadas = new ArrayList<Llamada>();
+    private String tipo;
+    private String nombre;
+    private String numeroTelefono;
+    private String cuit;
+    private String dni;
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    // mas getters y setters para los demás atributos
+}
+```
+
+```java
+public class Empresa {
+    private List<Cliente> clientes = new ArrayList<Cliente>();
+    private List<Llamada> llamadas = new ArrayList<Llamada>();
+    private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
+
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    // ...
+
+    public Llamada registrarLlamada(Cliente origen, Cliente destino, String t, int duracion) {
+        Llamada llamada = new Llamada(t, origen.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        llamadas.add(llamada);
+        origen.llamadas.add(llamada);
+        return llamada;
+    }
+
+    public double calcularMontoTotalLlamadas(Cliente cliente) {
+        double c = 0;
+        for (Llamada l : cliente.llamadas) {
+            double auxc = 0;
+            if (l.getTipoDeLlamada() == "nacional") {
+                // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+                auxc += l.getDuracion() * 3 + (l.getDuracion() * 3 * 0.21);
+            } else if (l.getTipoDeLlamada() == "internacional") {
+                // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+                auxc += l.getDuracion() * 150 + (l.getDuracion() * 150 * 0.21) + 50;
+            }
+
+            if (cliente.getTipo() == "fisica") {
+                auxc -= auxc * descuentoFis;
+            } else if (cliente.getTipo() == "juridica") {
+                auxc -= auxc * descuentoJur;
+            }
+            c += auxc;
+        }
+        return c;
+    }
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Vamos a aplicar ***Move Method*** para mover los métodos `registrarLlamada()` y `calcularMontoTotalLLamadas()` desde
+la clase `Empresa` a la clase `Cliente`. Para hacer esto también será necesario mover las variables de clase
+`descuentoJur` y `descuentoFis` a la clase `Cliente`, lo cual es lógico porque los descuentos son específicos del
+tipo de cliente.
+
+Mantendremos los métodos en la clase `Empresa` para evitar modificar la interfaz de dicha clase, pero estos métodos
+ahora delegarán su tarea en los nuevos métodos de la clase `Cliente`.
+
+Además, aprovechando que estamos modificando estos métodos, vamos a renombrar al parámetro `t` por `tipo` ya que
+consideramos que es más descriptivo (***Rename Field***).
+
+Finalmente, marcaremos al método `calcularMontoTotalLlamadas` como obsoleto (*deprecated*), puesto que consideramos
+que es preferible utilizar este método directamente desde el cliente. No lo borramos, aplicando ***Remove Middle Man***,
+para evitar modificar la interfaz de la clase `Cliente` y los test; sin embargo, al marcarlo como obsoleto, dejamos el
+terreno preparado para hacerlo fácilmente en un futuro.
+
+### Código con el refactoring aplicado
+
+```java
+public class Cliente {
+    // Variables de instancia...
+
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
+        Llamada llamada = new Llamada(tipo, this.getNumeroTelefono(), destino.getNumeroTelefono(), duracion);
+        this.llamadas.add(llamada);
+        return llamada;
+    }
+
+    public double calcularMontoTotalLlamadas() {
+        double c = 0;
+        for (Llamada l : this.llamadas) {
+            double auxc = 0;
+            if (l.getTipoDeLlamada() == "nacional") {
+                // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+                auxc += l.getDuracion() * 3 + (l.getDuracion() * 3 * 0.21);
+            } else if (l.getTipoDeLlamada() == "internacional") {
+                // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+                auxc += l.getDuracion() * 150 + (l.getDuracion() * 150 * 0.21) + 50;
+            }
+
+            if (this.getTipo() == "fisica") {
+                auxc -= auxc * descuentoFis;
+            } else if (this.getTipo() == "juridica") {
+                auxc -= auxc * descuentoJur;
+            }
+            c += auxc;
+        }
+        return c;
+    }
+
+    // Getters y setters...
+}
+```
+
+```java
+public class Empresa {
+    private List<Cliente> clientes = new ArrayList<Cliente>();
+    private List<Llamada> llamadas = new ArrayList<Llamada>();
+    private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
+
+    // ...
+
+    public Llamada registrarLlamada(Cliente origen, Cliente destino, String tipo, int duracion) {
+        Llamada llamada = origen.registrarLlamada(destino, tipo, duracion);
+        llamadas.add(llamada);
+        return llamada;
+    }
+
+    @Deprecated
+    public double calcularMontoTotalLlamadas(Cliente cliente) {
+        return cliente.calcularMontoTotalLlamadas();
+    }
+
+    // ...
+}
+```
+
+---
+
 ## Refactoring X
 
 ### Mal olor
+
 Explicación
 
 ### Extracto del código que presenta el mal olor
+
 ```java
 
 ```
 
 ### Refactoring a aplicar que resuelve el mal olor
+
 Explicación
 
 ### Código con el refactoring aplicado
+
 ```java
 
 ```
