@@ -212,6 +212,56 @@ public class Empresa {
 
 ---
 
+## Refactoring 2
+
+### Mal olor
+
+La variable de instancia `llamadas` en la clase `Empresa` no tiene mucho sentido. Cada cliente conoce todas
+sus llamadas y tiene sentido que así sea. Esta variable de instancia no solo genera duplicación de información,
+sino que además sus valores no se utilizan, solo agregamos las llamadas a la lista, pero luego no utilizamos esta
+información para procesar nada.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Empresa {
+    private List<Cliente> clientes = new ArrayList<Cliente>();
+    private List<Llamada> llamadas = new ArrayList<Llamada>();
+    private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
+
+    public Llamada registrarLlamada(Cliente origen, Cliente destino, String tipo, int duracion) {
+        Llamada llamada = origen.registrarLlamada(destino, tipo, duracion);
+        llamadas.add(llamada);  // Único uso de la variable de instancia `llamadas`
+        return llamada;
+    }
+    // Otros métodos...
+}
+
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Vamos a eliminar la variable de instancia `llamadas` de la clase `Empresa`. Al hacer esto tenemos que modificar el
+método `registrarLlamada`, que ahora únicamente delegará su tarea en el cliente de origen; por ello, siguiendo con el
+mismo criterio que en el refactoring anterior, marcaremos a este método como obsoleto.
+
+### Código con el refactoring aplicado
+
+```java
+public class Empresa {
+    private List<Cliente> clientes = new ArrayList<Cliente>();
+    private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
+
+    @Deprecated
+    public Llamada registrarLlamada(Cliente origen, Cliente destino, String tipo, int duracion) {
+        return origen.registrarLlamada(destino, tipo, duracion);
+    }
+    // Otros métodos...
+}
+```
+
+---
+
 ## Refactoring X
 
 ### Mal olor

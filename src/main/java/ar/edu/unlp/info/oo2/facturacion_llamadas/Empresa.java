@@ -5,7 +5,6 @@ import java.util.List;
 
 public class Empresa {
     private List<Cliente> clientes = new ArrayList<Cliente>();
-    private List<Llamada> llamadas = new ArrayList<Llamada>();
     private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
 
     public boolean agregarNumeroTelefono(String str) {
@@ -43,10 +42,9 @@ public class Empresa {
         return var;
     }
 
+    @Deprecated
     public Llamada registrarLlamada(Cliente origen, Cliente destino, String tipo, int duracion) {
-        Llamada llamada = origen.registrarLlamada(destino, tipo, duracion);
-        llamadas.add(llamada);
-        return llamada;
+        return origen.registrarLlamada(destino, tipo, duracion);
     }
 
     @Deprecated
