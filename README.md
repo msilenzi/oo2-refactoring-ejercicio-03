@@ -2,6 +2,8 @@
 
 > **Grupo:** Kessler Andrés, Silenzi Manuel
 
+## Enunciado
+
 **Importante:** Aprobando este ejercicio, no será necesario rendir el tema Refactoring en el parcial.
 
 **Fecha límite de entrega:** 24/05/2024 23:59 hs (máximo 2 integrantes por grupo).
@@ -257,6 +259,102 @@ public class Empresa {
         return origen.registrarLlamada(destino, tipo, duracion);
     }
     // Otros métodos...
+}
+```
+
+---
+
+## Refactoring 3
+
+### Mal olor
+
+El método `calcularMontoTotalLlamadas()` de la clase `Cliente` es un *método largo* que realiza varias tareas. Se
+encarga de recorrer todas las llamadas del cliente y, para cada llamada, calcula el costo y el descuento que se debe
+aplicar.
+
+Además, el recorrido de la lista de llamadas se hace utilizando un for-each y consideramos es mejor utilizar *streams*,
+ya que se mejora la legibilidad y no tenemos que andar reinventando la rueda.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    // ...
+    public double calcularMontoTotalLlamadas() {
+        double c = 0;
+        for (Llamada l : this.llamadas) {
+            double auxc = 0;
+            if (l.getTipoDeLlamada() == "nacional") {
+                // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+                auxc += l.getDuracion() * 3 + (l.getDuracion() * 3 * 0.21);
+            } else if (l.getTipoDeLlamada() == "internacional") {
+                // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+                auxc += l.getDuracion() * 150 + (l.getDuracion() * 150 * 0.21) + 50;
+            }
+
+            if (this.getTipo() == "fisica") {
+                auxc -= auxc * descuentoFis;
+            } else if (this.getTipo() == "juridica") {
+                auxc -= auxc * descuentoJur;
+            }
+            c += auxc;
+        }
+        return c;
+    }
+    // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para mejorar este método vamos a aplicar varios cambios.
+
+Primero vamos a aplicar ***Extract Method*** para separar el recorrido de la lista de la operación a aplicar sobre
+cada elemento. Para ello, vamos a crear un nuevo método `calcularMontoTotalLlamada()` que se encargará de calcular
+el monto de cada llamada de forma individual.
+
+Luego utilizaremos ***Substitute Algorithm*** para simplificar ligeramente la lógica que se utiliza para calcular 
+los montos.
+
+Después vamos a utilizar ***Extract Method*** nuevamente en el nuevo método para crear dos métodos más:
+`calcularMontoLlamada()`, que se encargará de calcular el monto de una llamada, y `aplicarDescuento()`, que se
+encargará de calcular el monto con el que se debe aplicar.
+
+Finalmente, emplearemos ***Replace Loop with Pipeline*** para deshacernos del bucle for-each.
+
+### Código con el refactoring aplicado
+
+```java
+public class Cliente {
+    // ...
+    public double calcularMontoTotalLlamadas() {
+        return this.llamadas.stream().mapToDouble(this::calcularMontoTotalLlamada).sum();
+    }
+
+    private double calcularMontoTotalLlamada(Llamada l) {
+        return aplicarDescuento(calcularMontoLlamada(l));
+    }
+
+    private double calcularMontoLlamada(Llamada l) {
+        if (l.getTipoDeLlamada() == "nacional") {
+            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+            return l.getDuracion() * 3 * 1.21;
+        } else if (l.getTipoDeLlamada() == "internacional") {
+            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+            return l.getDuracion() * 150 * 1.21 + 50;
+        }
+        return 0;
+    }
+
+    private double aplicarDescuento(double monto) {
+        if (this.getTipo() == "fisica") {
+            return monto * (1 - descuentoFis);
+        } else if (this.getTipo() == "juridica") {
+            return monto * (1 - descuentoJur);
+        }
+        return monto;
+    }
+    // ...
 }
 ```
 

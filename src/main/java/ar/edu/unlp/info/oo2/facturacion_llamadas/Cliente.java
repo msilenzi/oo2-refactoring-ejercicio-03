@@ -21,25 +21,31 @@ public class Cliente {
     }
 
     public double calcularMontoTotalLlamadas() {
-        double c = 0;
-        for (Llamada l : this.llamadas) {
-            double auxc = 0;
-            if (l.getTipoDeLlamada() == "nacional") {
-                // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
-                auxc += l.getDuracion() * 3 + (l.getDuracion() * 3 * 0.21);
-            } else if (l.getTipoDeLlamada() == "internacional") {
-                // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
-                auxc += l.getDuracion() * 150 + (l.getDuracion() * 150 * 0.21) + 50;
-            }
+        return this.llamadas.stream().mapToDouble(this::calcularMontoTotalLlamada).sum();
+    }
 
-            if (this.getTipo() == "fisica") {
-                auxc -= auxc * descuentoFis;
-            } else if (this.getTipo() == "juridica") {
-                auxc -= auxc * descuentoJur;
-            }
-            c += auxc;
+    private double calcularMontoTotalLlamada(Llamada l) {
+        return aplicarDescuento(calcularMontoLlamada(l));
+    }
+
+    private double calcularMontoLlamada(Llamada l) {
+        if (l.getTipoDeLlamada() == "nacional") {
+            // el precio es de 3 pesos por segundo más IVA sin adicional por establecer la llamada
+            return l.getDuracion() * 3 * 1.21;
+        } else if (l.getTipoDeLlamada() == "internacional") {
+            // el precio es de 150 pesos por segundo más IVA más 50 pesos por establecer la llamada
+            return l.getDuracion() * 150 * 1.21 + 50;
         }
-        return c;
+        return 0;
+    }
+
+    private double aplicarDescuento(double monto) {
+        if (this.getTipo() == "fisica") {
+            return monto * (1 - descuentoFis);
+        } else if (this.getTipo() == "juridica") {
+            return monto * (1 - descuentoJur);
+        }
+        return monto;
     }
 
     //
