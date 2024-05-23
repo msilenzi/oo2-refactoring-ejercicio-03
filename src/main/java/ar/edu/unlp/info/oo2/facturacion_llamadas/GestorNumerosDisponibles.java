@@ -18,18 +18,18 @@ public class GestorNumerosDisponibles {
         switch (tipoGenerador) {
             case "ultimo":
                 linea = lineas.last();
-                lineas.remove(linea);
-                return linea;
+                break;
             case "primero":
                 linea = lineas.first();
-                lineas.remove(linea);
-                return linea;
+                break;
             case "random":
                 linea = new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
-                lineas.remove(linea);
-                return linea;
+                break;
+            default:
+                return null;
         }
-        return null;
+        this.lineas.remove(linea);
+        return linea;
     }
 
     public void cambiarTipoGenerador(String valor) {

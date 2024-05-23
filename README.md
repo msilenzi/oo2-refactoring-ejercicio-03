@@ -1217,6 +1217,99 @@ public class Cliente {
 
 ---
 
+## Refactoring 12
+
+### Mal olor
+
+En la clase `GestorNumerosDisponibles`, dentro del método `obtenerNumeroLibre()`, hay código repetido (en todos los casos remueve la línea y luego la retorna).
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class GestorNumerosDisponibles {
+    // ...
+    public String obtenerNumeroLibre() {
+        String linea;
+        switch (tipoGenerador) {
+            case "ultimo":
+                linea = lineas.last();
+                lineas.remove(linea);
+                return linea;
+            case "primero":
+                linea = lineas.first();
+                lineas.remove(linea);
+                return linea;
+            case "random":
+                linea = new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
+                lineas.remove(linea);
+                return linea;
+        }
+        return null;
+    }
+    // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para eliminar el código repetido aplicaremos ***Consolidate Duplicate Conditional Fragments***. Moveremos el código
+común a los distintos casos luego del `switch` y pondremos el `return null` como el caso por defecto, 
+haciendo un early return en caso de que el tipo definido no sea correcto.
+
+### Código con el refactoring aplicado
+
+```java
+public class GestorNumerosDisponibles {
+    // ...
+    public String obtenerNumeroLibre() {
+        String linea;
+        switch (tipoGenerador) {
+            case "ultimo":
+                linea = lineas.last();
+                break;
+            case "primero":
+                linea = lineas.first();
+                break;
+            case "random":
+                linea = new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
+                break;
+            default:
+                return null;
+        }
+        this.lineas.remove(linea);
+        return linea;
+    }
+    // ...
+}
+```
+
+---
+
+## Refactoring 13
+
+### Mal olor
+
+Explicación
+
+### Extracto del código que presenta el mal olor
+
+```java
+
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Explicación
+
+### Código con el refactoring aplicado
+
+```java
+
+```
+
+
+---
+
 ## Refactoring X
 
 ### Mal olor
