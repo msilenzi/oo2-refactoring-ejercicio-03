@@ -19,8 +19,9 @@ public class Empresa {
         }
     }
 
+    @Deprecated
     public String obtenerNumeroLibre() {
-        return guia.obtenerNumeroLibre();
+        return guia.popNumeroLibre();
     }
 
     @Deprecated
@@ -41,11 +42,11 @@ public class Empresa {
     }
 
     public Cliente registrarClienteFisico(String nombre, String dni) {
-        return this._registrarUsuario(new ClienteFisico(nombre, this.obtenerNumeroLibre(), dni));
+        return this._registrarUsuario(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
     }
 
     public Cliente registrarClienteJuridico(String nombre, String cuit) {
-        return this._registrarUsuario(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
+        return this._registrarUsuario(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
     }
 
     @Deprecated

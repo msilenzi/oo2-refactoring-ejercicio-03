@@ -1495,6 +1495,109 @@ public class GestorNumerosDisponibles {
 
 ---
 
+## Refactoring 15
+
+### Mal olor
+
+El nombre del método `obtenerNumeroLibre()` de la clase `GenstorNumerosDisponibles` es poco descriptivo, ya que no solo
+devuelve un número libre sino que también lo elimina de la colección de números disponibles.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class GestorNumerosDisponibles {
+    //...
+    public String obtenerNumeroLibre() {
+        String linea = generador.obtenerNumeroLibre(this.lineas);
+        this.lineas.remove(linea);
+        return linea;
+    }
+    //...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Aplicamos el refactoring ***Rename Field*** y renombramos el método `obtenerNumeroLibre()` como `popNumeroLibre()`,
+haciendo referencia a la operación `pop()` de muchas colecciones.
+
+### Código con el refactoring aplicado
+
+```java
+public class GestorNumerosDisponibles {
+    //...
+    public String popNumeroLibre() {
+        String linea = generador.obtenerNumeroLibre(this.lineas);
+        this.lineas.remove(linea);
+        return linea;
+    }
+    //...
+}
+```
+
+```java
+public class Empresa {
+    // ...
+  public String obtenerNumeroLibre() {
+    return guia.popNumeroLibre();
+  }
+  // ...
+}
+```
+
+---
+
+## Refactoring 16
+
+### Mal olor
+
+El método `obtenerNumeroLibre()` de la clase `Empresa` es un ***Middle Man*** del método `popNumeroLibre()`. Esto es un
+problema porque incrementa innecesariamente la cantidad de métodos que posee la clase.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Empresa {
+    // ...
+  public String obtenerNumeroLibre() {
+    return guia.popNumeroLibre();
+  }
+  // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver esto aplicaremos ***Remove Middle Man***, que implicará remover el método `obtenerNumeroLibre()` de la
+clase `Empresa` y cambiar los llamados a este método para usar directamente el método `popNumeroLibre()` de la clase `GestorNumerosDisponibles`
+
+En lugar de eliminar el método `obtenerNumeroLibre()` lo marcamos como obsoleto para no modificar la interfaz de la clase.
+
+### Código con el refactoring aplicado
+
+```java
+public class Empresa {
+    // ...
+    @Deprecated
+    public String obtenerNumeroLibre() {
+      return guia.popNumeroLibre();
+    }
+
+    // ...
+    
+  public Cliente registrarClienteFisico(String nombre, String dni) {
+    return this._registrarUsuario(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
+  }
+
+  public Cliente registrarClienteJuridico(String nombre, String cuit) {
+    return this._registrarUsuario(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
+  }
+    // ...
+}
+```
+
+---
+
 ## Refactoring X
 
 ### Mal olor
@@ -1516,3 +1619,7 @@ Explicación
 ```java
 
 ```
+
+Doble ==
+atributo public 
+agregarNumeroTel

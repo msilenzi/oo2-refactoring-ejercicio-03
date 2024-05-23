@@ -14,7 +14,7 @@ public class GestorNumerosDisponibles {
         return lineas;
     }
 
-    public String obtenerNumeroLibre() {
+    public String popNumeroLibre() {
         String linea = generador.obtenerNumeroLibre(this.lineas);
         this.lineas.remove(linea);
         return linea;
