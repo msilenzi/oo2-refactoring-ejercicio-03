@@ -1289,24 +1289,118 @@ public class GestorNumerosDisponibles {
 
 ### Mal olor
 
-Explicación
+En la clase `GestorNumerosDisponibles` seguimos teniendo un ***Switch Statement*** definiendo el comportamiento del método `obtenerNumeroLibre()` según el tipo del generador.
 
 ### Extracto del código que presenta el mal olor
 
 ```java
-
+public class GestorNumerosDisponibles {
+    // ...
+    public String obtenerNumeroLibre() {
+        String linea;
+        switch (tipoGenerador) {
+            case "ultimo":
+                linea = lineas.last();
+                break;
+            case "primero":
+                linea = lineas.first();
+                break;
+            case "random":
+                linea = new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
+                break;
+            default:
+                return null;
+        }
+        this.lineas.remove(linea);
+        return linea;
+    }
+    // ...
+}
 ```
 
 ### Refactoring a aplicar que resuelve el mal olor
 
-Explicación
+Para resolver este mal olor utilizaremos ***Replace Conditional Logic with Strategy***. Crearemos una interfaz llamada
+`GeneradorStrategy` con un método `obtenerNumeroLibre()`, que será implementado por las clases
+`GeneradorPrimeroStrategy`, `GeneradorUltimoStrategy` y `GeneradorRandomStrategy`, con el comportamiento que le
+corresponda.
+
+Luego, cambiamos el atributo `tipoGenerador` para ser un objeto `GeneradorStrategy`. Ademàs, modificamos el método 
+`cambiarTipoGenerador()` para asignarle a `tipoGenerador` un objeto de la clase correspondiente según el parámetro
+recibido. Sin embargo, consideramos que esta no es la mejor forma de asignar un strategy así que lo marcamos como
+*obsoleto* y sobrecargamos al método `cambiarTipoGenerador()` para que reciba un nuevo strategy.
 
 ### Código con el refactoring aplicado
 
 ```java
+public class GestorNumerosDisponibles {
+  private SortedSet<String> lineas = new TreeSet<String>();
+  private GeneradorStrategy tipoGenerador = new GeneradorUltimoStrategy();
 
+
+  public SortedSet<String> getLineas() {
+    return lineas;
+  }
+
+  public String obtenerNumeroLibre() {
+    String linea = tipoGenerador.obtenerNumeroLibre(this.lineas);
+    this.lineas.remove(linea);
+    return linea;
+  }
+
+  @Deprecated
+  public void cambiarTipoGenerador(String valor) {
+    switch (valor) {
+      case "ultimo":
+        this.tipoGenerador = new GeneradorUltimoStrategy();
+        break;
+      case "primero":
+        this.tipoGenerador = new GeneradorPrimeroStrategy();
+        break;
+      case "random":
+        this.tipoGenerador = new GeneradorRandomStrategy();
+        break;
+    }
+  }
+
+  public void cambiarTipoGenerador(GeneradorStrategy tipoGenerador) {
+    this.tipoGenerador = tipoGenerador;
+  }
+}
 ```
 
+```java
+public interface GeneradorStrategy {
+    String obtenerNumeroLibre(SortedSet<String> lineas);
+}
+```
+
+```java
+public class GeneradorUltimoStrategy implements GeneradorStrategy {
+    @Override
+    public String obtenerNumeroLibre(SortedSet<String> lineas) {
+        return lineas.last();
+    }
+}
+```
+
+```java
+public class GeneradorPrimeroStrategy implements GeneradorStrategy {
+    @Override
+    public String obtenerNumeroLibre(SortedSet<String> lineas) {
+        return lineas.first();
+    }
+}
+```
+
+```java
+public class GeneradorRandomStrategy implements GeneradorStrategy {
+    @Override
+    public String obtenerNumeroLibre(SortedSet<String> lineas) {
+        return new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
+    }
+}
+```
 
 ---
 
