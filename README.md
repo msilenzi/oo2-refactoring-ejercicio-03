@@ -751,9 +751,12 @@ public class Empresa {
 Para resolver este mal olor aplicaremos la técnica ***Remove Setting Method***. Primero implementaremos un
 constructor dentro de la clase `Cliente` para establecer todos los valores necesarios y moveremos la inicialización
 de la lista `llamadas` al constructor. Luego, marcaremos todos los setters como *obsoletos*, ya que consideramos
-que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalemnte, en la clase `Empresa`,
-dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole el valor `null`
-a los atributos que no utiliza.
+que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalmente, en la clase `Empresa`,
+dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole `null` a los 
+atributos que no utiliza.
+
+También aplicaremos ***Consolidate Duplicate Conditional Fragments*** para eliminar el código repetido en el if-else.
+Moveremos la variable `tel` antes del if-else.
 
 ### Código con el refactoring aplicado
 
