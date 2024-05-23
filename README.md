@@ -1289,7 +1289,8 @@ public class GestorNumerosDisponibles {
 
 ### Mal olor
 
-En la clase `GestorNumerosDisponibles` seguimos teniendo un ***Switch Statement*** definiendo el comportamiento del método `obtenerNumeroLibre()` según el tipo del generador.
+En la clase `GestorNumerosDisponibles` seguimos teniendo un ***Switch Statement*** definiendo el comportamiento del
+método `obtenerNumeroLibre()` según el tipo del generador.
 
 ### Extracto del código que presenta el mal olor
 
@@ -1398,6 +1399,96 @@ public class GeneradorRandomStrategy implements GeneradorStrategy {
     @Override
     public String obtenerNumeroLibre(SortedSet<String> lineas) {
         return new ArrayList<String>(lineas).get(new Random().nextInt(lineas.size()));
+    }
+}
+```
+
+---
+
+## Refactoring 14
+
+### Mal olor
+
+Al realizar el anterior refactoring el nombre del atributo `tipoGenerador` pierde sentido.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class GestorNumerosDisponibles {
+    private SortedSet<String> lineas = new TreeSet<String>();
+    private GeneradorStrategy tipoGenerador = new GeneradorUltimoStrategy();
+
+
+    public SortedSet<String> getLineas() {
+        return lineas;
+    }
+
+    public String obtenerNumeroLibre() {
+        String linea = tipoGenerador.obtenerNumeroLibre(this.lineas);
+        this.lineas.remove(linea);
+        return linea;
+    }
+
+    @Deprecated
+    public void cambiarTipoGenerador(String valor) {
+        switch (valor) {
+            case "ultimo":
+                this.tipoGenerador = new GeneradorUltimoStrategy();
+                break;
+            case "primero":
+                this.tipoGenerador = new GeneradorPrimeroStrategy();
+                break;
+            case "random":
+                this.tipoGenerador = new GeneradorRandomStrategy();
+                break;
+        }
+    }
+
+    public void cambiarTipoGenerador(GeneradorStrategy tipoGenerador) {
+        this.tipoGenerador = tipoGenerador;
+    }
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Aplicamos el refactoring ***Rename Field*** y renombramos al atributo `tipoGenerador` como `generador`.
+
+### Código con el refactoring aplicado
+
+```java
+public class GestorNumerosDisponibles {
+    private SortedSet<String> lineas = new TreeSet<String>();
+    private GeneradorStrategy generador = new GeneradorUltimoStrategy();
+
+
+    public SortedSet<String> getLineas() {
+        return lineas;
+    }
+
+    public String obtenerNumeroLibre() {
+        String linea = generador.obtenerNumeroLibre(this.lineas);
+        this.lineas.remove(linea);
+        return linea;
+    }
+
+    @Deprecated
+    public void cambiarTipoGenerador(String valor) {
+        switch (valor) {
+            case "ultimo":
+                this.generador = new GeneradorUltimoStrategy();
+                break;
+            case "primero":
+                this.generador = new GeneradorPrimeroStrategy();
+                break;
+            case "random":
+                this.generador = new GeneradorRandomStrategy();
+                break;
+        }
+    }
+
+    public void cambiarTipoGenerador(GeneradorStrategy generador) {
+        this.generador = generador;
     }
 }
 ```

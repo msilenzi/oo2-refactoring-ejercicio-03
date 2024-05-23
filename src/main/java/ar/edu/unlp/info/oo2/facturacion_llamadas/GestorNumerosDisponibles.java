@@ -7,7 +7,7 @@ import java.util.SortedSet;
 
 public class GestorNumerosDisponibles {
     private SortedSet<String> lineas = new TreeSet<String>();
-    private GeneradorStrategy tipoGenerador = new GeneradorUltimoStrategy();
+    private GeneradorStrategy generador = new GeneradorUltimoStrategy();
 
 
     public SortedSet<String> getLineas() {
@@ -15,7 +15,7 @@ public class GestorNumerosDisponibles {
     }
 
     public String obtenerNumeroLibre() {
-        String linea = tipoGenerador.obtenerNumeroLibre(this.lineas);
+        String linea = generador.obtenerNumeroLibre(this.lineas);
         this.lineas.remove(linea);
         return linea;
     }
@@ -24,18 +24,18 @@ public class GestorNumerosDisponibles {
     public void cambiarTipoGenerador(String valor) {
         switch (valor) {
             case "ultimo":
-                this.tipoGenerador = new GeneradorUltimoStrategy();
+                this.generador = new GeneradorUltimoStrategy();
                 break;
             case "primero":
-                this.tipoGenerador = new GeneradorPrimeroStrategy();
+                this.generador = new GeneradorPrimeroStrategy();
                 break;
             case "random":
-                this.tipoGenerador = new GeneradorRandomStrategy();
+                this.generador = new GeneradorRandomStrategy();
                 break;
         }
     }
 
-    public void cambiarTipoGenerador(GeneradorStrategy tipoGenerador) {
-        this.tipoGenerador = tipoGenerador;
+    public void cambiarTipoGenerador(GeneradorStrategy generador) {
+        this.generador = generador;
     }
 }
