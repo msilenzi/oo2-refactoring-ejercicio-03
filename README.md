@@ -748,11 +748,11 @@ public class Empresa {
 
 ### Refactoring a aplicar que resuelve el mal olor
 
-Para resolver este mal olor aplicaremos la técnica ***Remove Setting Method***. Primero implementaremos un 
-constructor dentro de la clase `Cliente` para establecer todos los valores necesarios y moveremos la inicialización 
-de la lista `llamadas` al constructor. Luego, marcaremos todos los setters como *obsoletos*, ya que consideramos 
-que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalemnte, en la clase `Empresa`, 
-dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole el valor `null` 
+Para resolver este mal olor aplicaremos la técnica ***Remove Setting Method***. Primero implementaremos un
+constructor dentro de la clase `Cliente` para establecer todos los valores necesarios y moveremos la inicialización
+de la lista `llamadas` al constructor. Luego, marcaremos todos los setters como *obsoletos*, ya que consideramos
+que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalemnte, en la clase `Empresa`,
+dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole el valor `null`
 a los atributos que no utiliza.
 
 ### Código con el refactoring aplicado
@@ -826,6 +826,116 @@ public class Empresa {
 ```
 
 ---
+
+## Refactoring 8
+
+### Mal olor
+
+En el método `aplicarDescuento()` de la clase `Cliente` utilizamos un `if` para determinar el descuento a aplicar
+según el tipo de cliente. Esto es un problema porque no se aprovecha el polimorfismo.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    // ...
+    private double aplicarDescuento(double monto) {
+        if (this.getTipo() == "fisica") {
+            return monto * (1 - descuentoFis);
+        } else if (this.getTipo() == "juridica") {
+            return monto * (1 - descuentoJur);
+        }
+        return monto;
+    }
+    // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver este mal olor aplicaremos ***Replace Conditional with Polymorphism***, siguiendo una metodología muy
+similar a la utilizada en el refactoring 5. Primero haremos que la clase `Cliente` sea abstracta y que de ella
+extiendan dos nuevas clases (una para cada tipo) `ClienteFisico` y `ClienteJuridico`. Luego, haremos que el método
+`aplicarDescuento()` sea abstracto y que cada una de las subclases lo implemente de acuerdo a sus necesidades.
+
+Al igual que ocurrió en el refactoring 5, al realizar estos cambios ya no podremos instanciar a `Cliente`, por lo
+que tendremos que modificar al método `registrarUsuario()` de la clase `Empresa`. Crearemos tres métodos nuevos:
+
+- `_registrarUsuario()`: para manejar la lógica de registrar un ususario.
+- `registrarUsuarioFisico()`: para crear un usuario físico y después pasárselo a `_registrarUsuario()`.
+- `registrarUsuarioJuridico()`: para crear un usuario jurídico y después pasárselo a `_registrarUsuario()`.
+
+Finalmente, modificaremos al método `registrarUsuario()` de la clase `Empresa` para que se encargue de llamar al
+método `registrarUsuarioFisico()` o `registrarUsuarioJuridico()` según corresponda y marcaremos a este método como
+*obsoleto*, ya que es preferible utilizar alguno de los métodos nuevos, pero no lo borramos porque no queremos
+modificar la interfaz de la clase `Empresa`.
+
+### Código con el refactoring aplicado
+
+```java
+public abstract class Cliente {
+    // ...
+    protected abstract double aplicarDescuento(double monto);
+    // ...
+}
+```
+
+```java
+public class ClienteJuridico extends Cliente {
+    public ClienteJuridico(String tipo, String nombre, String numeroTelefono, String cuit) {
+        super(tipo, nombre, numeroTelefono, cuit, null);
+    }
+
+    @Override
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - Cliente.descuentoJur);
+    }
+}
+```
+
+```java
+public class ClienteFisico extends Cliente {
+    public ClienteFisico(String tipo, String nombre, String numeroTelefono, String dni) {
+        super(tipo, nombre, numeroTelefono, null, dni);
+    }
+
+    @Override
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - Cliente.descuentoFis);
+    }
+}
+```
+
+```java
+public class Empresa {
+    // ...
+    @Deprecated
+    public Cliente registrarUsuario(String data, String nombre, String tipo) {
+        switch (tipo) {
+            case "fisica":
+                return this.registrarClienteFisico(nombre, data);
+            case "juridica":
+                return this.registrarClienteJuridico(nombre, data);
+            default:
+                throw new IllegalArgumentException(tipo + " no es un tipo válido");
+        }
+    }
+
+    private Cliente _registrarUsuario(Cliente cliente) {
+        this.clientes.add(cliente);
+        return cliente;
+    }
+
+    public Cliente registrarClienteFisico(String nombre, String dni) {
+        return this._registrarUsuario(new ClienteFisico(nombre, this.obtenerNumeroLibre(), dni));
+    }
+
+    public Cliente registrarClienteJuridico(String nombre, String cuit) {
+        return this._registrarUsuario(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
+    }
+    // ...
+}
+```
 
 ## Refactoring X
 

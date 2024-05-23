@@ -23,16 +23,29 @@ public class Empresa {
         return guia.obtenerNumeroLibre();
     }
 
+    @Deprecated
     public Cliente registrarUsuario(String data, String nombre, String tipo) {
-        Cliente var = null;
-        String tel = this.obtenerNumeroLibre();
-        if (tipo.equals("fisica")) {
-            var = new Cliente(nombre, tipo, tel, null, data);
-        } else if (tipo.equals("juridica")) {
-            var = new Cliente(nombre, tipo, tel, data, null);
+        switch (tipo) {
+            case "fisica":
+                return this.registrarClienteFisico(nombre, data);
+            case "juridica":
+                return this.registrarClienteJuridico(nombre, data);
+            default:
+                throw new IllegalArgumentException(tipo + " no es un tipo válido");
         }
-        clientes.add(var);
-        return var;
+    }
+
+    private Cliente _registrarUsuario(Cliente cliente) {
+        this.clientes.add(cliente);
+        return cliente;
+    }
+
+    public Cliente registrarClienteFisico(String nombre, String dni) {
+        return this._registrarUsuario(new ClienteFisico(nombre, this.obtenerNumeroLibre(), dni));
+    }
+
+    public Cliente registrarClienteJuridico(String nombre, String cuit) {
+        return this._registrarUsuario(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
     }
 
     @Deprecated

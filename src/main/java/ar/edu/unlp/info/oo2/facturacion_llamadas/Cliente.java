@@ -3,7 +3,7 @@ package ar.edu.unlp.info.oo2.facturacion_llamadas;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cliente {
+public abstract class Cliente {
     public List<Llamada> llamadas;
     private String tipo;
     private String nombre;
@@ -58,14 +58,7 @@ public class Cliente {
         return aplicarDescuento(llamada.calcularMonto());
     }
 
-    private double aplicarDescuento(double monto) {
-        if (this.getTipo() == "fisica") {
-            return monto * (1 - descuentoFis);
-        } else if (this.getTipo() == "juridica") {
-            return monto * (1 - descuentoJur);
-        }
-        return monto;
-    }
+    protected abstract double aplicarDescuento(double monto);
 
     //
     // Getters y setters
