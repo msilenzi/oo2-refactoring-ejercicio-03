@@ -5,21 +5,12 @@ import java.util.List;
 
 public abstract class Cliente {
     public List<Llamada> llamadas;
-    private String tipo;
     private String nombre;
     private String numeroTelefono;
-    private String cuit;
-    private String dni;
 
-    static double descuentoJur = 0.15;
-    static double descuentoFis = 0;
-
-    public Cliente(String tipo, String nombre, String numeroTelefono, String cuit, String dni) {
-        this.tipo = tipo;
+    public Cliente(String nombre, String numeroTelefono) {
         this.nombre = nombre;
         this.numeroTelefono = numeroTelefono;
-        this.cuit = cuit;
-        this.dni = dni;
         this.llamadas = new ArrayList<>();
     }
 
@@ -63,15 +54,6 @@ public abstract class Cliente {
     //
     // Getters y setters
 
-    public String getTipo() {
-        return tipo;
-    }
-
-    @Deprecated
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
     public String getNombre() {
         return nombre;
     }
@@ -88,23 +70,5 @@ public abstract class Cliente {
     @Deprecated
     public void setNumeroTelefono(String numeroTelefono) {
         this.numeroTelefono = numeroTelefono;
-    }
-
-    public String getCuit() {
-        return cuit;
-    }
-
-    @Deprecated
-    public void setCuit(String cuit) {
-        this.cuit = cuit;
-    }
-
-    public String getDNI() {
-        return dni;
-    }
-
-    @Deprecated
-    public void setDNI(String dni) {
-        this.dni = dni;
     }
 }

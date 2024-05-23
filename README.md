@@ -877,7 +877,23 @@ modificar la interfaz de la clase `Empresa`.
 
 ```java
 public abstract class Cliente {
-    // ...
+    public List<Llamada> llamadas;
+    private String nombre;
+    private String numeroTelefono;
+    private String cuit;
+    private String dni;
+
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    public Cliente(String nombre, String numeroTelefono, String cuit, String dni) {
+        this.nombre = nombre;
+        this.numeroTelefono = numeroTelefono;
+        this.cuit = cuit;
+        this.dni = dni;
+        this.llamadas = new ArrayList<>();
+    }
+
     protected abstract double aplicarDescuento(double monto);
     // ...
 }
@@ -886,7 +902,7 @@ public abstract class Cliente {
 ```java
 public class ClienteJuridico extends Cliente {
     public ClienteJuridico(String nombre, String numeroTelefono, String cuit) {
-        super("juridica", nombre, numeroTelefono, cuit, null);
+        super(nombre, numeroTelefono, cuit, null);
     }
 
     @Override
@@ -899,7 +915,7 @@ public class ClienteJuridico extends Cliente {
 ```java
 public class ClienteFisico extends Cliente {
     public ClienteFisico(String nombre, String numeroTelefono, String dni) {
-        super("fisica", nombre, numeroTelefono, null, dni);
+        super(nombre, numeroTelefono, null, dni);
     }
 
     @Override
@@ -937,6 +953,136 @@ public class Empresa {
         return this._registrarUsuario(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
     }
     // ...
+}
+```
+
+---
+
+## Refactoring 9
+
+### Mal olor
+
+La clase `Cliente` cuenta con campos que son usados solo por algunas de las subclases. La variable de instancia
+`dni` y la variable de clase `descuentoFis` son utilizadas únicamente por la clase `ClienteFisico`, mientras que la
+variable de instancia `cuit` y la variable de clase `descuentoJur` son utilizadas únicamente por la
+clase `ClienteJuridico`.
+
+Esto es un problema porque tenemos clases que cuentan con información que no utilizan, lo que implica que no se está
+aplicando el polimorfismo de forma correcta.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public abstract class Cliente {
+    public List<Llamada> llamadas;
+    private String nombre;
+    private String numeroTelefono;
+    private String cuit;
+    private String dni;
+
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    // ...
+}
+```
+
+```java
+public class ClienteJuridico extends Cliente {
+    public ClienteJuridico(String nombre, String numeroTelefono, String cuit) {
+        super(nombre, numeroTelefono, cuit, null);
+    }
+}
+```
+
+```java
+public class ClienteFisico extends Cliente {
+    public ClienteFisico(String nombre, String numeroTelefono, String dni) {
+        super(nombre, numeroTelefono, null, dni);
+    }
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver este problema aplicaremos ***Push Down Field***. Eliminaremos los atributos `dni`, `cuit`,
+`descuentoFis` y `descuentoJur` de la clase `Cliente` y los moveremos a las subclases que le corresponden.
+
+Al hacer esto, tendremos que modificar los constructores de la clase `Cliente`, `ClienteJuridico` y `ClienteFisico`.
+
+Además, tendremos que aplicar ***Push Down Method*** a los getters y setters de las variables que movimos
+previamente (moveremos los setters aunque estén deprecados para mantener la interfaz).
+
+Por último, cambiaremos la invocación de las variables estáticas dentro de los métodos `aplicarDescuento()` en cada 
+subclase.
+
+### Código con el refactoring aplicado
+
+```java
+public abstract class Cliente {
+    public List<Llamada> llamadas;
+    private String nombre;
+    private String numeroTelefono;
+
+    public Cliente(String nombre, String numeroTelefono) {
+        this.nombre = nombre;
+        this.numeroTelefono = numeroTelefono;
+        this.llamadas = new ArrayList<>();
+    }
+    //...
+}
+```
+```java
+public class ClienteFisico extends Cliente {
+    private String dni;
+    static double descuentoFis = 0;
+
+    public ClienteFisico(String nombre, String numeroTelefono, String dni) {
+        super(nombre, numeroTelefono);
+        this.dni = dni;
+    }
+
+    @Override
+    protected double aplicarDescuento(double monto) {
+      return monto * (1 - descuentoFis);
+    }
+  
+    public String getDni() {
+        return this.dni;
+    }
+
+    @Deprecated
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+    //...
+}
+```
+```java
+public class ClienteJuridico extends Cliente {
+    private String cuit;
+    static double descuentoJur = 0.15;
+
+    public ClienteJuridico(String nombre, String numeroTelefono, String cuit) {
+        super(nombre, numeroTelefono);
+        this.cuit = cuit;
+    }
+
+    @Override
+    protected double aplicarDescuento(double monto) {
+      return monto * (1 - descuentoJur);
+    }
+  
+    public String getCuit() {
+        return this.cuit;
+    }
+
+    @Deprecated
+    public void setCuit(String cuit) {
+        this.cuit = cuit;
+    }
+    
+    //...
 }
 ```
 
