@@ -675,6 +675,158 @@ public class LlamadaInternacional extends Llamada {
 
 ---
 
+## Refactoring 7
+
+### Mal olor
+
+La clase `Cliente` no posee un constructor. Esto es un problema porque no se define claramente que datos son
+necesarios al momento de crear un cliente, lo que podría llevar a la creación de objetos con datos inválidos (por
+ejemplo, un cliente sin nombre). Además, Java ya provee los constructores para la creación de objetos, por lo que no
+estamos aprovechando las herramientas que nos brinda el lenguaje. Finalmene, un atributo debería ser establecido en la
+creación y nunca alterarse. Al proveer un setter se indica que ese atributo podría cambiar y se rompe el
+encapsulamiento.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    public List<Llamada> llamadas = new ArrayList<Llamada>();
+    private String tipo;
+    private String nombre;
+    private String numeroTelefono;
+    private String cuit;
+    private String dni;
+
+    // Otros métodos y getters...
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setNumeroTelefono(String numeroTelefono) {
+        this.numeroTelefono = numeroTelefono;
+    }
+
+    public void setCuit(String cuit) {
+        this.cuit = cuit;
+    }
+
+    public void setDNI(String dni) {
+        this.dni = dni;
+    }
+}
+```
+
+```java
+public class Empresa {
+    // ...
+    public Cliente registrarUsuario(String data, String nombre, String tipo) {
+        Cliente var = new Cliente();
+        if (tipo.equals("fisica")) {
+            var.setNombre(nombre);
+            String tel = this.obtenerNumeroLibre();
+            var.setTipo(tipo);
+            var.setNumeroTelefono(tel);
+            var.setDNI(data);
+        } else if (tipo.equals("juridica")) {
+            String tel = this.obtenerNumeroLibre();
+            var.setNombre(nombre);
+            var.setTipo(tipo);
+            var.setNumeroTelefono(tel);
+            var.setCuit(data);
+        }
+        clientes.add(var);
+        return var;
+    }
+    // ...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolver este mal olor aplicaremos la técnica ***Remove Setting Method***. Primero implementaremos un 
+constructor dentro de la clase `Cliente` para establecer todos los valores necesarios y moveremos la inicialización 
+de la lista `llamadas` al constructor. Luego, marcaremos todos los setters como *obsoletos*, ya que consideramos 
+que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalemnte, en la clase `Empresa`, 
+dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole el valor `null` 
+a los atributos que no utiliza.
+
+### Código con el refactoring aplicado
+
+```java
+public class Cliente {
+    public List<Llamada> llamadas;
+    private String tipo;
+    private String nombre;
+    private String numeroTelefono;
+    private String cuit;
+    private String dni;
+
+    static double descuentoJur = 0.15;
+    static double descuentoFis = 0;
+
+    public Cliente(String tipo, String nombre, String numeroTelefono, String cuit, String dni) {
+        this.tipo = tipo;
+        this.nombre = nombre;
+        this.numeroTelefono = numeroTelefono;
+        this.cuit = cuit;
+        this.dni = dni;
+        this.llamadas = new ArrayList<>();
+    }
+
+    // Otros métodos y getters...
+
+    @Deprecated
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    @Deprecated
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    @Deprecated
+    public void setNumeroTelefono(String numeroTelefono) {
+        this.numeroTelefono = numeroTelefono;
+    }
+
+    @Deprecated
+    public void setCuit(String cuit) {
+        this.cuit = cuit;
+    }
+
+    @Deprecated
+    public void setDNI(String dni) {
+        this.dni = dni;
+    }
+}
+```
+
+```java
+public class Empresa {
+    // ...
+    public Cliente registrarUsuario(String data, String nombre, String tipo) {
+        Cliente var = null;
+        String tel = this.obtenerNumeroLibre();
+        if (tipo.equals("fisica")) {
+            var = new Cliente(nombre, tipo, tel, null, data);
+        } else if (tipo.equals("juridica")) {
+            var = new Cliente(nombre, tipo, tel, data, null);
+        }
+        clientes.add(var);
+        return var;
+    }
+    // ...
+}
+```
+
+---
+
 ## Refactoring X
 
 ### Mal olor

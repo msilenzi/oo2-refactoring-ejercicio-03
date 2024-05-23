@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cliente {
-    public List<Llamada> llamadas = new ArrayList<Llamada>();
+    public List<Llamada> llamadas;
     private String tipo;
     private String nombre;
     private String numeroTelefono;
@@ -13,6 +13,15 @@ public class Cliente {
 
     static double descuentoJur = 0.15;
     static double descuentoFis = 0;
+
+    public Cliente(String tipo, String nombre, String numeroTelefono, String cuit, String dni) {
+        this.tipo = tipo;
+        this.nombre = nombre;
+        this.numeroTelefono = numeroTelefono;
+        this.cuit = cuit;
+        this.dni = dni;
+        this.llamadas = new ArrayList<>();
+    }
 
     @Deprecated
     public Llamada registrarLlamada(Cliente destino, String tipo, int duracion) {
@@ -65,6 +74,7 @@ public class Cliente {
         return tipo;
     }
 
+    @Deprecated
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
@@ -73,6 +83,7 @@ public class Cliente {
         return nombre;
     }
 
+    @Deprecated
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -81,6 +92,7 @@ public class Cliente {
         return numeroTelefono;
     }
 
+    @Deprecated
     public void setNumeroTelefono(String numeroTelefono) {
         this.numeroTelefono = numeroTelefono;
     }
@@ -89,6 +101,7 @@ public class Cliente {
         return cuit;
     }
 
+    @Deprecated
     public void setCuit(String cuit) {
         this.cuit = cuit;
     }
@@ -97,6 +110,7 @@ public class Cliente {
         return dni;
     }
 
+    @Deprecated
     public void setDNI(String dni) {
         this.dni = dni;
     }

@@ -24,19 +24,12 @@ public class Empresa {
     }
 
     public Cliente registrarUsuario(String data, String nombre, String tipo) {
-        Cliente var = new Cliente();
+        Cliente var = null;
+        String tel = this.obtenerNumeroLibre();
         if (tipo.equals("fisica")) {
-            var.setNombre(nombre);
-            String tel = this.obtenerNumeroLibre();
-            var.setTipo(tipo);
-            var.setNumeroTelefono(tel);
-            var.setDNI(data);
+            var = new Cliente(nombre, tipo, tel, null, data);
         } else if (tipo.equals("juridica")) {
-            String tel = this.obtenerNumeroLibre();
-            var.setNombre(nombre);
-            var.setTipo(tipo);
-            var.setNumeroTelefono(tel);
-            var.setCuit(data);
+            var = new Cliente(nombre, tipo, tel, data, null);
         }
         clientes.add(var);
         return var;
