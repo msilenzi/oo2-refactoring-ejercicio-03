@@ -29,17 +29,17 @@ public class Empresa {
         }
     }
 
-    private Cliente _registrarUsuario(Cliente cliente) {
+    private Cliente registrarCliente(Cliente cliente) {
         this.clientes.add(cliente);
         return cliente;
     }
 
     public Cliente registrarClienteFisico(String nombre, String dni) {
-        return this._registrarUsuario(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
+        return this.registrarCliente(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
     }
 
     public Cliente registrarClienteJuridico(String nombre, String cuit) {
-        return this._registrarUsuario(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
+        return this.registrarCliente(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
     }
 
     @Deprecated

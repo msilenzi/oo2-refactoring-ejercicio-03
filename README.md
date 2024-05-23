@@ -864,14 +864,16 @@ extiendan dos nuevas clases (una para cada tipo) `ClienteFisico` y `ClienteJurid
 Al igual que ocurrió en el refactoring 5, al realizar estos cambios ya no podremos instanciar a `Cliente`, por lo
 que tendremos que modificar al método `registrarUsuario()` de la clase `Empresa`. Crearemos tres métodos nuevos:
 
-- `_registrarUsuario()`: para manejar la lógica de registrar un ususario.
-- `registrarUsuarioFisico()`: para crear un usuario físico y después pasárselo a `_registrarUsuario()`.
-- `registrarUsuarioJuridico()`: para crear un usuario jurídico y después pasárselo a `_registrarUsuario()`.
+- `registrarCliente()`: para manejar la lógica de registrar un usuario.
+- `registrarClienteFisico()`: para crear un usuario físico y después pasárselo a `registrarCliente()`.
+- `registrarClienteJuridico()`: para crear un usuario jurídico y después pasárselo a `registrarCliente()`.
 
 Finalmente, modificaremos al método `registrarUsuario()` de la clase `Empresa` para que se encargue de llamar al
-método `registrarUsuarioFisico()` o `registrarUsuarioJuridico()` según corresponda y marcaremos a este método como
+método `registrarClienteFisico()` o `registrarClienteJuridico()` según corresponda y marcaremos a este método como
 *obsoleto*, ya que es preferible utilizar alguno de los métodos nuevos, pero no lo borramos porque no queremos
 modificar la interfaz de la clase `Empresa`.
+
+Cambiamos la palabra usuario por cliente porque es más clara (modifican una lista llamada `clientes`).
 
 ### Código con el refactoring aplicado
 
@@ -940,17 +942,17 @@ public class Empresa {
         }
     }
 
-    private Cliente _registrarUsuario(Cliente cliente) {
+    private Cliente registrarCliente(Cliente cliente) {
         this.clientes.add(cliente);
         return cliente;
     }
 
     public Cliente registrarClienteFisico(String nombre, String dni) {
-        return this._registrarUsuario(new ClienteFisico(nombre, this.obtenerNumeroLibre(), dni));
+        return this.registrarCliente(new ClienteFisico(nombre, this.obtenerNumeroLibre(), dni));
     }
 
     public Cliente registrarClienteJuridico(String nombre, String cuit) {
-        return this._registrarUsuario(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
+        return this.registrarCliente(new ClienteJuridico(nombre, this.obtenerNumeroLibre(), cuit));
     }
     // ...
 }
@@ -1586,11 +1588,11 @@ public class Empresa {
     // ...
     
   public Cliente registrarClienteFisico(String nombre, String dni) {
-    return this._registrarUsuario(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
+    return this.registrarCliente(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
   }
 
   public Cliente registrarClienteJuridico(String nombre, String cuit) {
-    return this._registrarUsuario(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
+    return this.registrarCliente(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
   }
     // ...
 }
@@ -1715,32 +1717,3 @@ public class GestorNumerosDisponibles {
     //...
 }
 ```
-
----
-
-## Refactoring X
-
-### Mal olor
-
-Explicación
-
-### Extracto del código que presenta el mal olor
-
-```java
-
-```
-
-### Refactoring a aplicar que resuelve el mal olor
-
-Explicación
-
-### Código con el refactoring aplicado
-
-```java
-
-```
-
-Doble ==
-atributo public 
-agregarNumeroTel
-nombres raros: guia, lineas
