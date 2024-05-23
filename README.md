@@ -752,7 +752,7 @@ Para resolver este mal olor aplicaremos la técnica ***Remove Setting Method***.
 constructor dentro de la clase `Cliente` para establecer todos los valores necesarios y moveremos la inicialización
 de la lista `llamadas` al constructor. Luego, marcaremos todos los setters como *obsoletos*, ya que consideramos
 que no son necesarios. No los borraremos para no alterar la interfaz de la clase. Finalmente, en la clase `Empresa`,
-dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole `null` a los 
+dentro del método `registrarUsuario()`, usaremos el constructor previamente mencionado asignándole `null` a los
 atributos que no utiliza.
 
 También aplicaremos ***Consolidate Duplicate Conditional Fragments*** para eliminar el código repetido en el if-else.
@@ -885,8 +885,8 @@ public abstract class Cliente {
 
 ```java
 public class ClienteJuridico extends Cliente {
-    public ClienteJuridico(String tipo, String nombre, String numeroTelefono, String cuit) {
-        super(tipo, nombre, numeroTelefono, cuit, null);
+    public ClienteJuridico(String nombre, String numeroTelefono, String cuit) {
+        super("juridica", nombre, numeroTelefono, cuit, null);
     }
 
     @Override
@@ -898,8 +898,8 @@ public class ClienteJuridico extends Cliente {
 
 ```java
 public class ClienteFisico extends Cliente {
-    public ClienteFisico(String tipo, String nombre, String numeroTelefono, String dni) {
-        super(tipo, nombre, numeroTelefono, null, dni);
+    public ClienteFisico(String nombre, String numeroTelefono, String dni) {
+        super("fisica", nombre, numeroTelefono, null, dni);
     }
 
     @Override
