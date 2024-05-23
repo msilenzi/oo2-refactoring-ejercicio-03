@@ -46,11 +46,7 @@ public abstract class Cliente {
     }
 
     private double calcularMontoTotalLlamada(Llamada llamada) {
-        return aplicarDescuento(llamada.calcularMonto());
-    }
-
-    protected double aplicarDescuento(double monto) {
-        return monto * (1 - this.getDescuento());
+        return llamada.calcularMonto() * (1 - this.getDescuento());
     }
 
     protected abstract double getDescuento();

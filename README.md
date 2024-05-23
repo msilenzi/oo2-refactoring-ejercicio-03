@@ -1173,30 +1173,49 @@ public class ClienteFisico extends Cliente {
 ```
 
 ---
+
 ## Refactoring 11
 
 ### Mal olor
 
-Middle man
-
+Luego de hacer el refactoring anterior surge un nuevo olor, es aparente que el método `calcularMontoTotalLlamada()` es
+un ***Middle Man*** del método `aplicarDescuento()`. Actualmente, solo hace una llamada al método `aplicarDescuento()`
+causando un nivel de indirección innecesario, haciendo que se pierda entre toda la delegación.
 
 ### Extracto del código que presenta el mal olor
 
 ```java
+public class Cliente {
+    // ...
+  private double calcularMontoTotalLlamada(Llamada llamada) {
+    return aplicarDescuento(llamada.calcularMonto());
+  }
 
+  protected double aplicarDescuento(double monto) {
+    return monto * (1 - this.getDescuento());
+  }
+  // ...
+}
 ```
 
 ### Refactoring a aplicar que resuelve el mal olor
 
-Explicación
+Como el método `aplicarDescuento()` es demasiado sencillo, en lugar de eliminar al intermediario
+(`calcularMontoTotalLlamada()`), aplicaremos el refactoring ***Inline Method*** y eliminaremos a `aplicarDescuento()`
+moviendo su funcionalidad al método `calcularMontoTotalLlamada()`.
 
 ### Código con el refactoring aplicado
 
 ```java
+public class Cliente {
+  private double calcularMontoTotalLlamada(Llamada llamada) {
+    return llamada.calcularMonto() * (1 - this.getDescuento());
+  }
+}
 
 ```
 
-
+---
 
 ## Refactoring X
 
