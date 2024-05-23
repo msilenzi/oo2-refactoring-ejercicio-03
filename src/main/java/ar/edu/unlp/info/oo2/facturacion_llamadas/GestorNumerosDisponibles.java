@@ -14,6 +14,18 @@ public class GestorNumerosDisponibles {
         return lineas;
     }
 
+    public boolean agregarNumeroTelefono(String str) {
+        boolean encontre = this.getLineas().contains(str);
+        if (!encontre) {
+            this.getLineas().add(str);
+            encontre = true;
+            return encontre;
+        } else {
+            encontre = false;
+            return encontre;
+        }
+    }
+
     public String popNumeroLibre() {
         String linea = generador.obtenerNumeroLibre(this.lineas);
         this.lineas.remove(linea);

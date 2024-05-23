@@ -7,16 +7,9 @@ public class Empresa {
     private List<Cliente> clientes = new ArrayList<Cliente>();
     private GestorNumerosDisponibles guia = new GestorNumerosDisponibles();
 
+    @Deprecated
     public boolean agregarNumeroTelefono(String str) {
-        boolean encontre = guia.getLineas().contains(str);
-        if (!encontre) {
-            guia.getLineas().add(str);
-            encontre = true;
-            return encontre;
-        } else {
-            encontre = false;
-            return encontre;
-        }
+        return guia.agregarNumeroTelefono(str);
     }
 
     @Deprecated

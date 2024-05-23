@@ -1598,6 +1598,73 @@ public class Empresa {
 
 ---
 
+## Refactoring 17
+
+### Mal olor
+
+En el método `agregarNumeroTelefono()` de la clase `Empresa` hay envidia de atributos, usa los atributos de la clase
+`GeneradorNumerosDisponibles`. Esto reduce la encapsulación y aumenta el acoplamiento entre dichas clases.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Empresa {
+    //...
+    public boolean agregarNumeroTelefono(String str) {
+        boolean encontre = guia.getLineas().contains(str);
+        if (!encontre) {
+            guia.getLineas().add(str);
+            encontre = true;
+            return encontre;
+        } else {
+            encontre = false;
+            return encontre;
+        }
+    }
+    //...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para resolverlo usaremos ***Move Method***. Moveremos el método `agregarNumeroTelefono()` desde la clase `Empresa` a la
+clase `GestorNumerosDisponibles`, reemplazando el método original por una llamada al método nuevo.
+
+Lo ideal sería remover completamente el método de la clase `Empresa`, pero simplemente lo marcaremos como *obsoleto* para mantener la interfaz usada originalmente.
+
+### Código con el refactoring aplicado
+
+```java
+public class Empresa {
+    //...
+    @Deprecated
+    public boolean agregarNumeroTelefono(String str) {
+        return guia.agregarNumeroTelefono(str);
+    }
+    //...
+}
+```
+
+```java
+public class GestorNumerosDisponibles {
+    //...
+    public boolean agregarNumeroTelefono(String str) {
+        boolean encontre = this.getLineas().contains(str);
+        if (!encontre) {
+            this.getLineas().add(str);
+            encontre = true;
+            return encontre;
+        } else {
+            encontre = false;
+            return encontre;
+        }
+    }
+    //...
+}
+```
+
+---
+
 ## Refactoring X
 
 ### Mal olor
@@ -1623,3 +1690,4 @@ Explicación
 Doble ==
 atributo public 
 agregarNumeroTel
+nombres raros: guia, lineas
