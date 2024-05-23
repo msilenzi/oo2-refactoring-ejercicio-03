@@ -1649,15 +1649,68 @@ public class Empresa {
 public class GestorNumerosDisponibles {
     //...
     public boolean agregarNumeroTelefono(String str) {
-        boolean encontre = this.getLineas().contains(str);
+        boolean encontre = this.lineas.contains(str);
         if (!encontre) {
-            this.getLineas().add(str);
+            this.lineas.add(str);
             encontre = true;
             return encontre;
         } else {
             encontre = false;
             return encontre;
         }
+    }
+    //...
+}
+```
+
+---
+
+## Refactoring 18
+
+### Mal olor
+
+Dentro del método `agregarNumeroTelefono()` de la clase `GestorNumerosDisponibles` estamos ***Reinventando la Rueda***.
+La colección de lineas es un `SortedSet` y el método `add()` de esta clase ya devuelve *false* y no agrega al elemento
+cuando este ya está en la colección.
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class GestorNumerosDisponibles {
+    private SortedSet<String> lineas = new TreeSet<String>();
+    
+    //...
+  
+    public boolean agregarNumeroTelefono(String str) {
+        boolean encontre = this.lineas.contains(str);
+        if (!encontre) {
+            this.lineas.add(str);
+            encontre = true;
+            return encontre;
+        } else {
+            encontre = false;
+            return encontre;
+        }
+    }
+    //...
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para solucionar este problema, haremos un ***Substitute Algorithm***. Reemplazaremos todo el código del método para
+que simplemente devuelva el resultado de intentar agregar el elemento a la colección.
+
+### Código con el refactoring aplicado
+
+```java
+public class GestorNumerosDisponibles {
+    private SortedSet<String> lineas = new TreeSet<String>();
+  
+    //...
+  
+    public boolean agregarNumeroTelefono(String str) {
+        return this.lineas.add(str);
     }
     //...
 }

@@ -15,15 +15,7 @@ public class GestorNumerosDisponibles {
     }
 
     public boolean agregarNumeroTelefono(String str) {
-        boolean encontre = this.getLineas().contains(str);
-        if (!encontre) {
-            this.getLineas().add(str);
-            encontre = true;
-            return encontre;
-        } else {
-            encontre = false;
-            return encontre;
-        }
+        return this.lineas.add(str);
     }
 
     public String popNumeroLibre() {
