@@ -1085,6 +1085,118 @@ public class ClienteJuridico extends Cliente {
     //...
 }
 ```
+---
+
+## Refactoring 10
+
+### Mal olor
+
+El método `aplicarDescuento()` dentro de las subclases `ClienteFisico` y `ClienteJuridico` es muy similar, con la única
+diferencia en los atributos estáticos que usa. Tenemos código duplicado. 
+
+
+### Extracto del código que presenta el mal olor
+
+```java
+public class Cliente {
+    // ...
+    protected abstract double aplicarDescuento(double monto);
+    // ...
+}
+```
+
+```java
+public class ClienteJuridico extends Cliente {
+    // ...
+    static double descuentoJur = 0.15;
+    // ...
+  
+    @Override
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - descuentoJur);
+    }
+}
+```
+
+```java
+public class ClienteFisico extends Cliente {
+    // ...
+    static double descuentoFis = 0;
+    // ...
+
+
+    @Override
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - descuentoFis);
+    }
+}
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Para solucionar esto, aplicaremos la técnica de ***Form Template Method***. Moveremos el método `aplicarDescuento()`
+(en este caso la receta) a la superclase `Cliente` con la diferencia de que donde antes iría el atributo
+`descuentoFis` o `descuentoJur` ahora usaremos un nuevo método llamado `getDescuento()`. Este método será abstracto en
+la clase `Cliente`, pero retornará el valor de `descuentoFis` y `descuentoJur` una vez lo definamos en las subclases
+`ClienteFisico` y `ClienteJuridico` respectivamente.
+
+Una vez hecho este cambio podremos aplicar ***Remove Dead Code*** para sacar los atributos estáticos, puesto que no los utilizamos.
+
+### Código con el refactoring aplicado
+
+```java
+public class Cliente {
+  protected double aplicarDescuento(double monto) {
+    return monto * (1 - this.getDescuento());
+  }
+
+  protected abstract double getDescuento();
+}
+```
+
+```java
+public class ClienteJuridico extends Cliente {
+  @Override
+  protected double getDescuento() {
+    return 0.15;
+  }
+}
+```
+
+```java
+public class ClienteFisico extends Cliente {
+  @Override
+  protected double getDescuento() {
+    return 0;
+  }
+}
+```
+
+---
+## Refactoring 11
+
+### Mal olor
+
+Middle man
+
+
+### Extracto del código que presenta el mal olor
+
+```java
+
+```
+
+### Refactoring a aplicar que resuelve el mal olor
+
+Explicación
+
+### Código con el refactoring aplicado
+
+```java
+
+```
+
+
 
 ## Refactoring X
 

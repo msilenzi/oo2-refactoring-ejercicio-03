@@ -49,7 +49,11 @@ public abstract class Cliente {
         return aplicarDescuento(llamada.calcularMonto());
     }
 
-    protected abstract double aplicarDescuento(double monto);
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - this.getDescuento());
+    }
+
+    protected abstract double getDescuento();
 
     //
     // Getters y setters
