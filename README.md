@@ -1015,7 +1015,7 @@ Al hacer esto, tendremos que modificar los constructores de la clase `Cliente`, 
 Además, tendremos que aplicar ***Push Down Method*** a los getters y setters de las variables que movimos
 previamente (moveremos los setters aunque estén deprecados para mantener la interfaz).
 
-Por último, cambiaremos la invocación de las variables estáticas dentro de los métodos `aplicarDescuento()` en cada 
+Por último, cambiaremos la invocación de las variables estáticas dentro de los métodos `aplicarDescuento()` en cada
 subclase.
 
 ### Código con el refactoring aplicado
@@ -1034,6 +1034,7 @@ public abstract class Cliente {
     //...
 }
 ```
+
 ```java
 public class ClienteFisico extends Cliente {
     private String dni;
@@ -1046,9 +1047,9 @@ public class ClienteFisico extends Cliente {
 
     @Override
     protected double aplicarDescuento(double monto) {
-      return monto * (1 - descuentoFis);
+        return monto * (1 - descuentoFis);
     }
-  
+
     public String getDni() {
         return this.dni;
     }
@@ -1060,6 +1061,7 @@ public class ClienteFisico extends Cliente {
     //...
 }
 ```
+
 ```java
 public class ClienteJuridico extends Cliente {
     private String cuit;
@@ -1072,9 +1074,9 @@ public class ClienteJuridico extends Cliente {
 
     @Override
     protected double aplicarDescuento(double monto) {
-      return monto * (1 - descuentoJur);
+        return monto * (1 - descuentoJur);
     }
-  
+
     public String getCuit() {
         return this.cuit;
     }
@@ -1083,10 +1085,11 @@ public class ClienteJuridico extends Cliente {
     public void setCuit(String cuit) {
         this.cuit = cuit;
     }
-    
+
     //...
 }
 ```
+
 ---
 
 ## Refactoring 10
@@ -1094,8 +1097,7 @@ public class ClienteJuridico extends Cliente {
 ### Mal olor
 
 El método `aplicarDescuento()` dentro de las subclases `ClienteFisico` y `ClienteJuridico` es muy similar, con la única
-diferencia en los atributos estáticos que usa. Tenemos código duplicado. 
-
+diferencia en los atributos estáticos que usa. Tenemos código duplicado.
 
 ### Extracto del código que presenta el mal olor
 
@@ -1112,7 +1114,7 @@ public class ClienteJuridico extends Cliente {
     // ...
     static double descuentoJur = 0.15;
     // ...
-  
+
     @Override
     protected double aplicarDescuento(double monto) {
         return monto * (1 - descuentoJur);
@@ -1142,35 +1144,36 @@ Para solucionar esto, aplicaremos la técnica de ***Form Template Method***. Mov
 la clase `Cliente`, pero retornará el valor de `descuentoFis` y `descuentoJur` una vez lo definamos en las subclases
 `ClienteFisico` y `ClienteJuridico` respectivamente.
 
-Una vez hecho este cambio podremos aplicar ***Remove Dead Code*** para sacar los atributos estáticos, puesto que no los utilizamos.
+Una vez hecho este cambio podremos aplicar ***Remove Dead Code*** para sacar los atributos estáticos, puesto que no los
+utilizamos.
 
 ### Código con el refactoring aplicado
 
 ```java
 public class Cliente {
-  protected double aplicarDescuento(double monto) {
-    return monto * (1 - this.getDescuento());
-  }
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - this.getDescuento());
+    }
 
-  protected abstract double getDescuento();
+    protected abstract double getDescuento();
 }
 ```
 
 ```java
 public class ClienteJuridico extends Cliente {
-  @Override
-  protected double getDescuento() {
-    return 0.15;
-  }
+    @Override
+    protected double getDescuento() {
+        return 0.15;
+    }
 }
 ```
 
 ```java
 public class ClienteFisico extends Cliente {
-  @Override
-  protected double getDescuento() {
-    return 0;
-  }
+    @Override
+    protected double getDescuento() {
+        return 0;
+    }
 }
 ```
 
@@ -1189,14 +1192,14 @@ causando un nivel de indirección innecesario, haciendo que se pierda entre toda
 ```java
 public class Cliente {
     // ...
-  private double calcularMontoTotalLlamada(Llamada llamada) {
-    return aplicarDescuento(llamada.calcularMonto());
-  }
+    private double calcularMontoTotalLlamada(Llamada llamada) {
+        return aplicarDescuento(llamada.calcularMonto());
+    }
 
-  protected double aplicarDescuento(double monto) {
-    return monto * (1 - this.getDescuento());
-  }
-  // ...
+    protected double aplicarDescuento(double monto) {
+        return monto * (1 - this.getDescuento());
+    }
+    // ...
 }
 ```
 
@@ -1210,9 +1213,9 @@ moviendo su funcionalidad al método `calcularMontoTotalLlamada()`.
 
 ```java
 public class Cliente {
-  private double calcularMontoTotalLlamada(Llamada llamada) {
-    return llamada.calcularMonto() * (1 - this.getDescuento());
-  }
+    private double calcularMontoTotalLlamada(Llamada llamada) {
+        return llamada.calcularMonto() * (1 - this.getDescuento());
+    }
 }
 
 ```
@@ -1223,7 +1226,8 @@ public class Cliente {
 
 ### Mal olor
 
-En la clase `GestorNumerosDisponibles`, dentro del método `obtenerNumeroLibre()`, hay código repetido (en todos los casos remueve la línea y luego la retorna).
+En la clase `GestorNumerosDisponibles`, dentro del método `obtenerNumeroLibre()`, hay código repetido (en todos los
+casos remueve la línea y luego la retorna).
 
 ### Extracto del código que presenta el mal olor
 
@@ -1255,7 +1259,7 @@ public class GestorNumerosDisponibles {
 ### Refactoring a aplicar que resuelve el mal olor
 
 Para eliminar el código repetido aplicaremos ***Consolidate Duplicate Conditional Fragments***. Moveremos el código
-común a los distintos casos luego del `switch` y pondremos el `return null` como el caso por defecto, 
+común a los distintos casos luego del `switch` y pondremos el `return null` como el caso por defecto,
 haciendo un early return en caso de que el tipo definido no sea correcto.
 
 ### Código con el refactoring aplicado
@@ -1328,7 +1332,7 @@ Para resolver este mal olor utilizaremos ***Replace Conditional Logic with Strat
 `GeneradorPrimeroStrategy`, `GeneradorUltimoStrategy` y `GeneradorRandomStrategy`, con el comportamiento que le
 corresponda.
 
-Luego, cambiamos el atributo `tipoGenerador` para ser un objeto `GeneradorStrategy`. Ademàs, modificamos el método 
+Luego, cambiamos el atributo `tipoGenerador` para ser un objeto `GeneradorStrategy`. Ademàs, modificamos el método
 `cambiarTipoGenerador()` para asignarle a `tipoGenerador` un objeto de la clase correspondiente según el parámetro
 recibido. Sin embargo, consideramos que esta no es la mejor forma de asignar un strategy así que lo marcamos como
 *obsoleto* y sobrecargamos al método `cambiarTipoGenerador()` para que reciba un nuevo strategy.
@@ -1337,38 +1341,38 @@ recibido. Sin embargo, consideramos que esta no es la mejor forma de asignar un 
 
 ```java
 public class GestorNumerosDisponibles {
-  private SortedSet<String> lineas = new TreeSet<String>();
-  private GeneradorStrategy tipoGenerador = new GeneradorUltimoStrategy();
+    private SortedSet<String> lineas = new TreeSet<String>();
+    private GeneradorStrategy tipoGenerador = new GeneradorUltimoStrategy();
 
 
-  public SortedSet<String> getLineas() {
-    return lineas;
-  }
-
-  public String obtenerNumeroLibre() {
-    String linea = tipoGenerador.obtenerNumeroLibre(this.lineas);
-    this.lineas.remove(linea);
-    return linea;
-  }
-
-  @Deprecated
-  public void cambiarTipoGenerador(String valor) {
-    switch (valor) {
-      case "ultimo":
-        this.tipoGenerador = new GeneradorUltimoStrategy();
-        break;
-      case "primero":
-        this.tipoGenerador = new GeneradorPrimeroStrategy();
-        break;
-      case "random":
-        this.tipoGenerador = new GeneradorRandomStrategy();
-        break;
+    public SortedSet<String> getLineas() {
+        return lineas;
     }
-  }
 
-  public void cambiarTipoGenerador(GeneradorStrategy tipoGenerador) {
-    this.tipoGenerador = tipoGenerador;
-  }
+    public String obtenerNumeroLibre() {
+        String linea = tipoGenerador.obtenerNumeroLibre(this.lineas);
+        this.lineas.remove(linea);
+        return linea;
+    }
+
+    @Deprecated
+    public void cambiarTipoGenerador(String valor) {
+        switch (valor) {
+            case "ultimo":
+                this.tipoGenerador = new GeneradorUltimoStrategy();
+                break;
+            case "primero":
+                this.tipoGenerador = new GeneradorPrimeroStrategy();
+                break;
+            case "random":
+                this.tipoGenerador = new GeneradorRandomStrategy();
+                break;
+        }
+    }
+
+    public void cambiarTipoGenerador(GeneradorStrategy tipoGenerador) {
+        this.tipoGenerador = tipoGenerador;
+    }
 }
 ```
 
@@ -1540,10 +1544,10 @@ public class GestorNumerosDisponibles {
 ```java
 public class Empresa {
     // ...
-  public String obtenerNumeroLibre() {
-    return guia.popNumeroLibre();
-  }
-  // ...
+    public String obtenerNumeroLibre() {
+        return guia.popNumeroLibre();
+    }
+    // ...
 }
 ```
 
@@ -1561,19 +1565,21 @@ problema porque incrementa innecesariamente la cantidad de métodos que posee la
 ```java
 public class Empresa {
     // ...
-  public String obtenerNumeroLibre() {
-    return guia.popNumeroLibre();
-  }
-  // ...
+    public String obtenerNumeroLibre() {
+        return guia.popNumeroLibre();
+    }
+    // ...
 }
 ```
 
 ### Refactoring a aplicar que resuelve el mal olor
 
 Para resolver esto aplicaremos ***Remove Middle Man***, que implicará remover el método `obtenerNumeroLibre()` de la
-clase `Empresa` y cambiar los llamados a este método para usar directamente el método `popNumeroLibre()` de la clase `GestorNumerosDisponibles`
+clase `Empresa` y cambiar los llamados a este método para usar directamente el método `popNumeroLibre()` de la
+clase `GestorNumerosDisponibles`
 
-En lugar de eliminar el método `obtenerNumeroLibre()` lo marcamos como obsoleto para no modificar la interfaz de la clase.
+En lugar de eliminar el método `obtenerNumeroLibre()` lo marcamos como obsoleto para no modificar la interfaz de la
+clase.
 
 ### Código con el refactoring aplicado
 
@@ -1582,18 +1588,18 @@ public class Empresa {
     // ...
     @Deprecated
     public String obtenerNumeroLibre() {
-      return guia.popNumeroLibre();
+        return guia.popNumeroLibre();
     }
 
     // ...
-    
-  public Cliente registrarClienteFisico(String nombre, String dni) {
-    return this.registrarCliente(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
-  }
 
-  public Cliente registrarClienteJuridico(String nombre, String cuit) {
-    return this.registrarCliente(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
-  }
+    public Cliente registrarClienteFisico(String nombre, String dni) {
+        return this.registrarCliente(new ClienteFisico(nombre, this.guia.popNumeroLibre(), dni));
+    }
+
+    public Cliente registrarClienteJuridico(String nombre, String cuit) {
+        return this.registrarCliente(new ClienteJuridico(nombre, this.guia.popNumeroLibre(), cuit));
+    }
     // ...
 }
 ```
@@ -1632,7 +1638,8 @@ public class Empresa {
 Para resolverlo usaremos ***Move Method***. Moveremos el método `agregarNumeroTelefono()` desde la clase `Empresa` a la
 clase `GestorNumerosDisponibles`, reemplazando el método original por una llamada al método nuevo.
 
-Lo ideal sería remover completamente el método de la clase `Empresa`, pero simplemente lo marcaremos como *obsoleto* para mantener la interfaz usada originalmente.
+Lo ideal sería remover completamente el método de la clase `Empresa`, pero simplemente lo marcaremos como *obsoleto*
+para mantener la interfaz usada originalmente.
 
 ### Código con el refactoring aplicado
 
@@ -1680,9 +1687,9 @@ cuando este ya está en la colección.
 ```java
 public class GestorNumerosDisponibles {
     private SortedSet<String> lineas = new TreeSet<String>();
-    
+
     //...
-  
+
     public boolean agregarNumeroTelefono(String str) {
         boolean encontre = this.lineas.contains(str);
         if (!encontre) {
@@ -1708,9 +1715,9 @@ que simplemente devuelva el resultado de intentar agregar el elemento a la colec
 ```java
 public class GestorNumerosDisponibles {
     private SortedSet<String> lineas = new TreeSet<String>();
-  
+
     //...
-  
+
     public boolean agregarNumeroTelefono(String str) {
         return this.lineas.add(str);
     }
@@ -1733,65 +1740,64 @@ tests y volvimos a ejecutarlos.
 
 Estos cambios los dejamos en el archivo EmpresaV2Test
 
-
 ```java
 class EmpresaV2Test {
-	Empresa sistema;
+    Empresa sistema;
 
-	@BeforeEach
-	public void setUp() {
-		this.sistema = new Empresa();
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444554");
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444555");
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444556");
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444557");
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444558");
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444559");
-	}
+    @BeforeEach
+    public void setUp() {
+        this.sistema = new Empresa();
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444554");
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444555");
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444556");
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444557");
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444558");
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444559");
+    }
 
-	@Test
-	void testcalcularMontoTotalLlamadas() {
-		Cliente emisorPersonaFisca = sistema.registrarClienteFisico("Brendan Eich", "11555666");
-		Cliente remitentePersonaFisica = sistema.registrarClienteFisico("Doug Lea", "00000001");
-		Cliente emisorPersonaJuridica = sistema.registrarClienteJuridico("Nvidia Corp", "17555222");
-		Cliente remitentePersonaJuridica = sistema.registrarClienteJuridico("Sun Microsystems", "25765432");
+    @Test
+    void testcalcularMontoTotalLlamadas() {
+        Cliente emisorPersonaFisca = sistema.registrarClienteFisico("Brendan Eich", "11555666");
+        Cliente remitentePersonaFisica = sistema.registrarClienteFisico("Doug Lea", "00000001");
+        Cliente emisorPersonaJuridica = sistema.registrarClienteJuridico("Nvidia Corp", "17555222");
+        Cliente remitentePersonaJuridica = sistema.registrarClienteJuridico("Sun Microsystems", "25765432");
 
-		emisorPersonaJuridica.registrarLlamadaNacional(remitentePersonaFisica, 10);
-		emisorPersonaJuridica.registrarLlamadaInternacional(remitentePersonaFisica, 8);
-		emisorPersonaJuridica.registrarLlamadaNacional(remitentePersonaJuridica, 5);
-		emisorPersonaJuridica.registrarLlamadaInternacional(remitentePersonaJuridica, 7);
+        emisorPersonaJuridica.registrarLlamadaNacional(remitentePersonaFisica, 10);
+        emisorPersonaJuridica.registrarLlamadaInternacional(remitentePersonaFisica, 8);
+        emisorPersonaJuridica.registrarLlamadaNacional(remitentePersonaJuridica, 5);
+        emisorPersonaJuridica.registrarLlamadaInternacional(remitentePersonaJuridica, 7);
 
-		emisorPersonaFisca.registrarLlamadaNacional(remitentePersonaFisica, 15);
-		emisorPersonaFisca.registrarLlamadaInternacional(remitentePersonaFisica, 45);
-		emisorPersonaFisca.registrarLlamadaNacional(remitentePersonaJuridica, 13);
-		emisorPersonaFisca.registrarLlamadaInternacional(remitentePersonaJuridica, 17);
+        emisorPersonaFisca.registrarLlamadaNacional(remitentePersonaFisica, 15);
+        emisorPersonaFisca.registrarLlamadaInternacional(remitentePersonaFisica, 45);
+        emisorPersonaFisca.registrarLlamadaNacional(remitentePersonaJuridica, 13);
+        emisorPersonaFisca.registrarLlamadaInternacional(remitentePersonaJuridica, 17);
 
-		assertEquals(11454.64, emisorPersonaFisca.calcularMontoTotalLlamadas(), 0.01);
-		assertEquals(2445.40, emisorPersonaJuridica.calcularMontoTotalLlamadas(), 0.01);
-		assertEquals(0, remitentePersonaFisica.calcularMontoTotalLlamadas());
-		assertEquals(0, remitentePersonaJuridica.calcularMontoTotalLlamadas());
-	}
+        assertEquals(11454.64, emisorPersonaFisca.calcularMontoTotalLlamadas(), 0.01);
+        assertEquals(2445.40, emisorPersonaJuridica.calcularMontoTotalLlamadas(), 0.01);
+        assertEquals(0, remitentePersonaFisica.calcularMontoTotalLlamadas());
+        assertEquals(0, remitentePersonaJuridica.calcularMontoTotalLlamadas());
+    }
 
-	@Test
-	void testAgregarUsuario() {
-		assertEquals(this.sistema.cantidadDeUsuarios(), 0);
-		this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444558");
-		Cliente nuevaPersona = this.sistema.registrarClienteFisico("Alan Turing", "2444555");
+    @Test
+    void testAgregarUsuario() {
+        assertEquals(this.sistema.cantidadDeUsuarios(), 0);
+        this.sistema.getGestorNumeros().agregarNumeroTelefono("2214444558");
+        Cliente nuevaPersona = this.sistema.registrarClienteFisico("Alan Turing", "2444555");
 
-		assertEquals(1, this.sistema.cantidadDeUsuarios());
-		assertTrue(this.sistema.existeUsuario(nuevaPersona));
-	}
+        assertEquals(1, this.sistema.cantidadDeUsuarios());
+        assertTrue(this.sistema.existeUsuario(nuevaPersona));
+    }
 
-	@Test
-	void obtenerNumeroLibre() {
-		// por defecto es el ultimo
-		assertEquals("2214444559", this.sistema.getGestorNumeros().popNumeroLibre());
+    @Test
+    void obtenerNumeroLibre() {
+        // por defecto es el ultimo
+        assertEquals("2214444559", this.sistema.getGestorNumeros().popNumeroLibre());
 
-		this.sistema.getGestorNumeros().cambiarTipoGenerador(new GeneradorPrimeroStrategy());
-		assertEquals("2214444554", this.sistema.getGestorNumeros().popNumeroLibre());
+        this.sistema.getGestorNumeros().cambiarTipoGenerador(new GeneradorPrimeroStrategy());
+        assertEquals("2214444554", this.sistema.getGestorNumeros().popNumeroLibre());
 
-		this.sistema.getGestorNumeros().cambiarTipoGenerador(new GeneradorRandomStrategy());
-		assertNotNull(this.sistema.getGestorNumeros().popNumeroLibre());
-	}
+        this.sistema.getGestorNumeros().cambiarTipoGenerador(new GeneradorRandomStrategy());
+        assertNotNull(this.sistema.getGestorNumeros().popNumeroLibre());
+    }
 }
 ```
