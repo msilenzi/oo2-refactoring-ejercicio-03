@@ -1,0 +1,71 @@
+@startuml
+
+abstract class Cliente {
+    - tipo: String
+    - nombre: String
+    - numeroTelefono: String
+
+	+ registrarLlamada(destino: Cliente, tipo: String, duracion: Integer): Llamada
+	- _registrarLlamada(llamada: Llamada): Llamada
+	+ registrarLlamadaNacional(destino: Cliente, duracion: Integer): Llamada
+	+ registrarLlamadaInternacional(destino: Cliente, duracion: Integer): Llamada
+	+ calcularMontoTotalLlamadas(): Real
+	+ calcularMontoTotalLlamada(llamada: Llamada)): Real
+	# {abstract}getDescuento(): Real
+
+
+	+ getNombre(): String
+	+ setNombre(nombre: String)
+	+ getNumeroTelefono(): String
+	+ setNumeroTelefono(numeroTelefono: String)
+}
+
+
+class Llamada {
+	- tipoDeLlamada: String
+	- origen: String
+	- destino: String
+	- duracion: Integer
+
+	+ <<create>> Llamada(tipoLlamada: String, origen: String, destino: String, duracion: Integer)
+	+ getTipoDeLlamada(): String
+	+ getRemitente(): String
+	+ getDuracion(): Integer
+	+ getOrigen(): String
+}
+
+
+class GestorNumerosDisponibles {
+	- lineas: String[*]
+	- tipoGenerador: String
+
+	+ getLineas(): String[*]
+	+ obtenerNumeroLibre(): String
+	+ cambiarTipoGenerador(valor: String)
+}
+
+
+class Empresa {
+	~ {static} descuentoJur: Real;
+	~ {static} descuentoFis: Real;
+
+	+ agregarNumeroTelefono(str: String): Boolean
+	+ obtenerNumeroLibre(): String
+	+ registrarUsuario(data: String, nombre: String, tipo: String): Cliente
+	+ registrarLlamada(origen: Cliente, destino: Client, t: String, duracion: Integer): Llamada
+	+ calcularMontoTotalLlamadas(cliente: Cliente): Real
+	+ cantidadDeUsuarios(): Integer
+	+ existeUsuario(persona: Cliente): Boolean
+	+ getGestorNumeros(): GestorNumerosDisponibles
+}
+
+
+
+
+Cliente "1" --> "*" Llamada : + llamadas
+
+Empresa "1" --> "*" Cliente: - clientes
+Empresa "1" --> "*" Llamada: - llamadas
+Empresa --> GestorNumerosDisponibles: - guia
+
+@enduml
